@@ -1,4 +1,7 @@
-# Render blueprint for the stateless demo API (no database, no disk, no secrets).
+# Optional. Render reads this file to deploy the demo API (demo/api) in one step; it is not
+# needed to use the packages or the static demo page. In Render: New > Blueprint > this repo.
+# Then put the service's URL in demo/web/config.js to turn on the upload form.
+# The service is stateless: no database, no disk, no secrets, no request logs.
 services:
   - type: web
     name: concept-extraction-demo

@@ -5,14 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "concept-pipeline"
 version = "0.1.0"
-description = "Concept-graph pipeline stages 2-6 for Hebrew-English course material (candidates, merging, importance, selection)"
+description = "Find and rank the key concepts in Hebrew-English course material (pipeline stages 2-6)"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
+keywords = ["hebrew", "concept-extraction", "keyphrase-extraction", "education"]
 # hebmath is installed from the same repository (extractor/); the pin keeps output stable.
 dependencies = [
     "hebmath==1.1.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/yoavmalino/Hebrew_English_Concept_Extraction"
+Demo = "https://yoavmalino.github.io/Hebrew_English_Concept_Extraction/"
 
 [tool.setuptools.packages.find]
 where = ["src"]

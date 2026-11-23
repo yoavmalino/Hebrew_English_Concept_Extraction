@@ -1,122 +1,148 @@
-# פורמט הפלט – `hebmath text v2`
+# Output format: `hebmath text v2`
 
-זהו החוזה בין המחלץ לבין השלבים הבאים בפייפליין. כל שינוי בו מעלה את מספר הגרסה (`extractor_version`).
-גרסה 2 (hebmath 1.1.0) שונה מגרסה 1 בשלושה דברים בלבד:
-1. בתוך פסקה, נוסחה והטקסט שלידה נמצאים בשורות נפרדות.
-2. תמונות ואובייקטים מוטמעים מושמטים בלי להשאיר סימון.
-3. נקודות מנחות של תוכן עניינים ("......") מכווצות.
+This is the contract between the extractor and the later pipeline stages. Any change to it bumps
+the version (`extractor_version`). Version 2 (hebmath 1.1.0) differs from version 1 in three
+ways only:
 
-כדי לקבל פלט בפורמט גרסה 1: `math_line_breaks="none"` (או `--math-line-breaks none`). המפרסר `hebmath.format.parse()` קורא את שתי הגרסאות.
+1. Inside a paragraph, a formula and the text next to it are on separate lines.
+2. Images and embedded objects are dropped with no marker.
+3. Table-of-contents leader dots ("......") are collapsed.
 
-## כללי
+For version 1 output use `math_line_breaks="none"` (or `--math-line-breaks none`). The parser
+`hebmath.format.parse()` reads both versions.
 
-* קידוד UTF-8 בלי BOM. סוף שורה `\n` בלבד.
-* הטקסט נשמר ב**סדר לוגי** (סדר הקריאה וההקלדה), לא בסדר החזותי. תווי בקרה דו-כיווניים מוסרים תמיד: U+200E, ‏U+200F, ‏U+202A–U+202E ו-U+2066–U+2069.
-* נרמול Unicode: ‏NFC. בנוסף, צורות מצגת עבריות ולטיניות בטווח U+FB00–U+FB4F מפורקות לצורתן הרגילה (למשל ה-ligature ‏`ﬁ`, או `שׁ` מוקדם).
-* הקובץ מורכב מ**בלוקים**:
-  * בין שני בלוקים יש בדיוק שורה ריקה אחת (`\n\n`).
-  * הקובץ מסתיים ב-`\n` אחד, ומסמך ריק מניב מחרוזת ריקה.
-  * בלוק פסקה יכול לתפוס כמה שורות פיזיות (ראו "שבירת שורות סביב נוסחאות"). שאר הבלוקים תופסים שורה אחת.
+## General
 
-## סוגי בלוקים
+- UTF-8 without a BOM. Line endings are `\n` only.
+- Text is in **logical order** (reading and typing order), not visual order. Bidi control
+  characters are always removed: U+200E, U+200F, U+202A–U+202E and U+2066–U+2069.
+- Unicode normalization is NFC. In addition, Hebrew and Latin presentation forms in
+  U+FB00–U+FB4F are decomposed to their ordinary forms (for example the `ﬁ` ligature, or a
+  precomposed `שׁ`).
+- The file is a sequence of **blocks**:
+  - exactly one empty line (`\n\n`) separates two blocks;
+  - the file ends with a single `\n`, and an empty document gives an empty string;
+  - a paragraph block may span several physical lines (see "Line breaks around formulas"); every
+    other block is one line.
 
-| בלוק | צורה | הערות |
+## Block types
+
+| Block | Form | Notes |
 |---|---|---|
-| פסקה | טקסט חופשי עם נוסחאות inline ו-placeholders | שורות שנגלשו (wrap) במקור מאוחדות. שבירות שורה בתוך הפסקה מופיעות רק סביב נוסחאות. |
-| נוסחת בלוק (display) | `$$<latex>$$` לבד בשורה | אם יש מספור משוואה: `$$<latex> \tag{<n>}$$` |
-| שורת טבלה | תאים מופרדים ב-` \| ` (רווח, קו אנכי, רווח) | DOCX בלבד. תמיד שורה אחת, גם כשיש בה נוסחאות. |
-| הערות שוליים (DOCX) | שורת `———` ואחריה פסקאות שמתחילות ב-`[n] ` | ההפניה בגוף הטקסט היא `[n]` |
+| Paragraph | Free text with inline formulas and placeholders | Lines wrapped in the source are joined. Line breaks inside a paragraph appear only around formulas |
+| Display formula | `$$<latex>$$` alone on its line | With an equation number: `$$<latex> \tag{<n>}$$` |
+| Table row | Cells separated by ` \| ` (space, bar, space) | DOCX only. Always one line, even when it holds formulas |
+| Footnotes (DOCX) | A `———` line followed by paragraphs starting with `[n] ` | The reference in the body is `[n]` |
 
-## נוסחאות
+## Formulas
 
-* **inline**: ‏`$<latex>$`, בתוך פסקה, במקומה בסדר הטקסט.
-* **display**: ‏`$$<latex>$$`, תמיד בלוק נפרד בשורה משלו.
-* בתוך `<latex>` אין אף פעם `$` לא-מוברח ואין שורה חדשה. **נוסחה לעולם לא נחצית בין שורות.**
-* ה-LaTeX משתמש רק בפקודות של LaTeX בסיסי ושל `amsmath`/`amssymb`, ולכן מתאים ל-KaTeX ול-MathJax. לדוגמה:
-  * `\frac`, `\sqrt[n]{}`, `\overline{}`;
-  * `\sum_{}^{}`, `\int_{}^{}`, `\lim_{}`, `\binom`;
-  * `\left( … \right)`;
-  * `\begin{pmatrix}`, `bmatrix`, `vmatrix`, `Vmatrix`, `Bmatrix`, `cases`, `matrix`;
-  * `\text{}`, `\operatorname{}`.
-* טקסט עברי בתוך נוסחה נכתב כ-`\text{...}` בסדר לוגי.
-* מספור משוואה מופיע רק ב-display, באמצעות `\tag{...}` בסוף.
+- **Inline**: `$<latex>$`, inside a paragraph, in its place in the text.
+- **Display**: `$$<latex>$$`, always a separate block on its own line.
+- `<latex>` never holds an unescaped `$` or a newline. **A formula never spans lines.**
+- The LaTeX uses only base LaTeX, `amsmath` and `amssymb` commands, so it works with KaTeX and
+  MathJax. For example:
+  - `\frac`, `\sqrt[n]{}`, `\overline{}`;
+  - `\sum_{}^{}`, `\int_{}^{}`, `\lim_{}`, `\binom`;
+  - `\left( … \right)`;
+  - `\begin{pmatrix}`, `bmatrix`, `vmatrix`, `Vmatrix`, `Bmatrix`, `cases`, `matrix`;
+  - `\text{}`, `\operatorname{}`.
+- Hebrew text inside a formula is written as `\text{...}` in logical order.
+- Equation numbers appear only in display formulas, as a final `\tag{...}`.
 
-### שבירת שורות סביב נוסחאות (חדש ב-v2)
+### Line breaks around formulas (new in v2)
 
-ברירת המחדל היא `math_line_breaks="formulas"`. בתוך פסקה:
+The default is `math_line_breaks="formulas"`. Inside a paragraph:
 
-1. **כל נוסחה שאינה סמל בודד נמצאת בשורה משלה**, כלומר יש שבירת שורה בינה לבין הטקסט שלפניה ואחריה. לדוגמה:
+1. **Every formula that is not a single symbol is on its own line**: there is a line break
+   between it and the text before and after it. For example:
    ```
    נגדיר את ההעתקה
    $T:V\to W$
    ונניח כי
    $\dim V=n$.
    ```
-2. **סמל בודד נשאר בתוך המשפט.** דוגמאות:
-   * `$V$`, `$\lambda$`, `$\mathbb{R}$`, `$A_{n\times n}$`, `$x^{2}$`, `$\overline{z}$`;
-   * כל צורה שמתאימה ל-`hebmath.serialize.is_simple_math()`.
+2. **A single symbol stays inside the sentence.** For example:
+   - `$V$`, `$\lambda$`, `$\mathbb{R}$`, `$A_{n\times n}$`, `$x^{2}$`, `$\overline{z}$`;
+   - anything `hebmath.serialize.is_simple_math()` accepts.
 
-   **הנימוק:** שבירת שורה סביב כל שם של משתנה מפרקת את המשפט ומקשה על הקריאה, ואין בה תועלת לניתוח. סמל כזה הוא חלק מהמשפט, לא נוסחה עצמאית.
-3. **פיסוק שסוגר את הנוסחה נשאר בשורה שלה**, ולכן שורה לעולם לא מתחילה בפיסוק. זה חל על `.`, `,`, `;`, `:`, `)`, `]`, `?`, `!`, `%` וגרשיים.
-4. **סוגר פותח שבא מיד לפני נוסחה עובר לשורה שלה**, ולכן שורה לעולם לא מסתיימת ב-`(`.
-5. **מספור רשימה** (`1.`, `א.`, `(a)`) שבא מיד לפני נוסחה נשאר לפניה באותה שורה.
-6. **אות שימוש עברית עם מקף** נשארת צמודה לנוסחה, למשל `ו-$x>0$` או `כש-$n\to\infty$`. האות היא חלק דקדוקי מהביטוי, והפרדתה פוגעת במשמעות. במקרה גבולי הכלל הוא להעדיף את שלמות הנוסחה.
-7. **כמה נוסחאות רצופות**, בלי טקסט ביניהן, חולקות שורה אחת ומופרדות ברווח.
-8. **שורת טבלה** לא נשברת.
+   **Why:** breaking the line around every variable name tears the sentence apart and makes it
+   hard to read, with no benefit to analysis. Such a symbol is part of the sentence, not a
+   formula of its own.
+3. **Punctuation that closes a formula stays on its line**, so a line never starts with
+   punctuation. This covers `.`, `,`, `;`, `:`, `)`, `]`, `?`, `!`, `%` and quotes.
+4. **An opening bracket right before a formula moves to the formula's line**, so a line never
+   ends with `(`.
+5. **List numbering** (`1.`, `א.`, `(a)`) right before a formula stays in front of it on the
+   same line.
+6. **A Hebrew prefix letter with a hyphen** stays attached to the formula, as in `ו-$x>0$` or
+   `כש-$n\to\infty$`. The letter is grammatically part of the expression, and splitting it off
+   changes the meaning. In borderline cases the rule favors keeping the formula whole.
+7. **Consecutive formulas** with no text between them share one line, separated by a space.
+8. **Table rows** are never broken.
 
-אפשרויות נוספות:
-* `math_line_breaks="all"`: גם סמל בודד מקבל שורה משלו.
-* `math_line_breaks="none"`: התנהגות v1, הכל בשורה אחת.
+Other options:
 
-### ניתוח (parsing)
+- `math_line_breaks="all"`: a single symbol gets its own line too.
+- `math_line_breaks="none"`: v1 behavior, everything on one line.
 
-מומלץ להשתמש במפרסר הייחוס `hebmath.format.parse()`, שנבדק מול הפלט.
-* הוא מחזיר `ParsedBlock` עם `parts`, שהם הפסקה כולה כשהשורות מחוברות ברווח.
-* בנוסף יש `lines`: רשימת חלקים לכל שורה פיזית.
+### Parsing
 
-האלגוריתם:
-* שורה שמתחילה ב-`$$` ומסתיימת ב-`$$` היא display.
-* שורות פסקה נסרקות משמאל לימין:
-  * `\` ואחריו `\` או `$` הוא תו מוברח.
-  * `$` לא-מוברח פותח נוסחה שנמשכת עד ה-`$` הבא שאינו מוברח. בתוך הנוסחה `\` מדלג על התו הבא.
-* כל נוסחה מתחילה ומסתיימת באותה שורה.
+Use the reference parser `hebmath.format.parse()`, which is tested against the output.
 
-## הברחה (escaping) בטקסט הרגיל
+- It returns `ParsedBlock` objects with `parts`: the whole paragraph, its lines joined by a space.
+- It also gives `lines`: a list of parts per physical line.
 
-רק שני תווים מוברחים מחוץ לנוסחאות:
+The algorithm:
 
-| בטקסט המקורי | בפלט |
+- A line that starts with `$$` and ends with `$$` is a display formula.
+- Paragraph lines are scanned left to right:
+  - `\` followed by `\` or `$` is an escaped character;
+  - an unescaped `$` opens a formula that runs to the next unescaped `$`. Inside a formula, `\`
+    skips the next character.
+- Every formula starts and ends on the same line.
+
+## Escaping in plain text
+
+Only two characters are escaped outside formulas:
+
+| In the source | In the output |
 |---|---|
 | `\` | `\\` |
 | `$` | `\$` |
 
-כך `$` שמופיע בטקסט (במחיר, למשל) לעולם לא ייקרא כתחילת נוסחה. כדי לשחזר את הטקסט המקורי: `\\`→`\`, `\$`→`$`.
+So a `$` in the text (a price, say) is never read as the start of a formula. To restore the
+original text: `\\` to `\`, `\$` to `$`.
 
-רצף של 6 נקודות או יותר (נקודות מנחות של תוכן עניינים) נכתב כ-` … `.
+A run of six or more dots (table-of-contents leaders) is written as ` … `.
 
 ## Placeholders
 
-**תמונות, דיאגרמות ואובייקטים מוטמעים מתעלמים מהם לגמרי.** אין חילוץ, אין תיאור ואין OCR, ולא נשאר מהם סימון בפלט:
-* תמונות ב-DOCX;
-* אובייקטי OLE שאינם משוואות;
-* תמונות ב-PDF;
-* תוויות טקסט בתוך שרטוטים וקטוריים ב-PDF. אלה מזוהים ומושמטים, והמספר שלהם מופיע ב-`stats.figure_glyphs_dropped`.
+**Images, diagrams and embedded objects are ignored entirely.** No extraction, no description, no
+OCR, and no marker in the output. This covers:
 
-משוואות לעומת זאת **כן** מחולצות, בין שהן אובייקט OMML, טקסט או גליפים, ובין שהן קווים וקטוריים כמו שבר, `\overline`, `|x|` ו-`√`.
+- images in DOCX;
+- OLE objects that are not equations;
+- images in PDF;
+- text labels inside PDF vector drawings. These are detected and dropped, and their count is in
+  `stats.figure_glyphs_dropped`.
 
-סימון נשאר רק לתוכן מתמטי או טקסטואלי שקיים במקור ולא ניתן להמרה:
+Equations, on the other hand, **are** extracted, whether they are OMML objects, text or glyphs,
+and including vector lines such as fraction bars, `\overline`, `|x|` and `√`.
 
-| סימון | משמעות |
+A marker remains only for mathematical or textual content that exists in the source and cannot be
+converted:
+
+| Marker | Meaning |
 |---|---|
-| `[[hebmath:math-object]]` | משוואה ישנה מסוג Equation Editor 3.0 או MathType (אובייקט OLE) שלא הומרה |
-| `[[hebmath:unreadable-page]]` | עמוד PDF בלי שכבת טקסט כש-OCR כבוי או לא זמין, או עמוד פגום |
-| `[[hebmath:page=N]]` | גבול עמוד (רק אם `page_markers=True`) |
+| `[[hebmath:math-object]]` | An old Equation Editor 3.0 or MathType equation (OLE object) that was not converted |
+| `[[hebmath:unreadable-page]]` | A PDF page with no text layer while OCR is off or unavailable, or a damaged page |
+| `[[hebmath:page=N]]` | A page boundary (only with `page_markers=True`) |
 
-ביטוי לזיהוי: `\[\[hebmath:[a-z0-9=\-]+\]\]`.
+Pattern to match them: `\[\[hebmath:[a-z0-9=\-]+\]\]`.
 
-## דו"ח נלווה (JSON)
+## Report (JSON)
 
-`ExtractionResult.to_dict()` (או `--report` ב-CLI) נשמר לצד הטקסט:
+`ExtractionResult.to_dict()` (or `--report` on the command line) is saved next to the text:
 
 ```json
 {
@@ -134,16 +160,17 @@
 }
 ```
 
-שדות `stats` שנוספו ב-1.1:
+`stats` fields added in 1.1:
 
-| שדה | משמעות |
+| Field | Meaning |
 |---|---|
-| `recovered_fonts` | גופנים בלי מיפוי Unicode שפוענחו לפי צורת הגליף |
-| `recovered_glyphs` | גליפים שפוענחו |
-| `unresolved_glyphs` | גליפים שלא פוענחו בביטחון. אם הערך גדול מ-0 נוספת גם אזהרה. |
-| `recovery_ocr_pages` | עמודים שעברו OCR רק כבדיקה צולבת לפענוח |
-| `assembled_delimiters` | סוגריים גבוהים שהורכבו מכמה חלקים |
-| `restored_glyphs` | גליפים ש-PDFium דיווח עליהם כרווח ושוחזרו |
-| `figure_glyphs_dropped` | תווים שהושמטו כי הם תוויות בתוך שרטוט |
+| `recovered_fonts` | Fonts with no Unicode mapping decoded by glyph shape |
+| `recovered_glyphs` | Glyphs decoded |
+| `unresolved_glyphs` | Glyphs not decoded with confidence. Above 0, a warning is added too |
+| `recovery_ocr_pages` | Pages OCR'd only to cross-check the decoding |
+| `assembled_delimiters` | Tall brackets assembled from several pieces |
+| `restored_glyphs` | Glyphs PDFium reported as spaces and that were restored |
+| `figure_glyphs_dropped` | Characters dropped because they are labels inside a drawing |
 
-קודי שגיאה יציבים: `empty_file`, `unsupported_format`, `corrupt_file`, `encrypted_file`, `resource_limit`, `timeout`, `io_error`, `internal_error`.
+Stable error codes: `empty_file`, `unsupported_format`, `corrupt_file`, `encrypted_file`,
+`resource_limit`, `timeout`, `io_error`, `internal_error`.

@@ -1,186 +1,244 @@
-# hebmath – מחלץ טקסט עברי ומתמטיקה (LaTeX) מקבצי PDF ו-DOCX
+# hebmath: Hebrew text and LaTeX math from PDF and DOCX
 
-שלב 1 של [hebrew-english-concept-extraction](../README.md), וגם חבילה עצמאית: מקבלת קובץ PDF או DOCX ומחזיר טקסט רגיל (`.txt`) בסדר קריאה נכון, שבו כל נוסחה מופיעה במקומה כקוד LaTeX: ‏`$...$` לנוסחה בתוך שורה ו-`$$...$$` לנוסחה כבלוק נפרד. הפורמט המלא מתועד ב-[docs/FORMAT.md](docs/FORMAT.md) (גרסה 2: כל נוסחה בשורה נפרדת מהטקסט שלידה, ותמונות ושרטוטים מושמטים).
+Stage 1 of [Hebrew-English Concept Extraction](../README.md), usable on its own. It takes a PDF
+or DOCX and returns plain text in correct reading order, with every formula in place as LaTeX:
+`$...$` inline and `$$...$$` as a block. It also returns the document's structure (headings,
+units, emphasis). The output contract is [docs/FORMAT.md](docs/FORMAT.md) (version 2: each
+formula on its own line, images and drawings dropped).
+
 ```python
 from hebmath import Extractor, ExtractorConfig
 
-extractor = Extractor(ExtractorConfig())  # מופע אחד לכל worker
+extractor = Extractor(ExtractorConfig())  # one instance per worker
 result = extractor.extract_bytes(data, filename="summary.pdf")
 if result.ok:
-    save_text(result.text)  # הטקסט עומד בפני עצמו
-    save_report(result.to_dict())  # סטטוס, אזהרות, סטטיסטיקות, גרסאות מנועים
+    save_text(result.text)  # the text stands on its own
+    save_report(result.to_dict())  # status, warnings, stats, engine versions
 else:
     log(result.error_code, result.error_message)  # corrupt_file / encrypted_file / ...
 ```
 
 ```bash
 hebmath summary.docx -o summary.txt --report summary.json
-hebmath scan.pdf --no-ocr           # בלי OCR
-hebmath input/algebra.pdf --out-dir output    # → output/algebra/algebra.txt + report.json
-hebmath summary.pdf --math-line-breaks none   # פורמט v1: נוסחאות בתוך השורה
+hebmath scan.pdf --no-ocr
+hebmath input/notes.pdf --out-dir output        # -> output/notes/notes.txt + report.json
+hebmath summary.pdf --math-line-breaks none     # format v1: formulas inside the line
 ```
 
-`extract()` אף פעם לא זורק חריגה על קלט גרוע: קובץ פגום, מוצפן, ריק או ענק מחזיר `ok=False` עם קוד שגיאה יציב.
+`extract()` never raises on bad input. A corrupt, encrypted, empty or oversized file returns
+`ok=False` with a stable error code.
 
----
+## Why Python
 
-## למה Python
+- **PDF engine.** pypdfium2 (Apache-2.0/BSD-3) wraps Chrome's PDFium and gives, for every glyph,
+  its ink box, baseline, size and font, plus vector lines. It is fast and robust on damaged
+  files. pdf.js gives only text runs, with no per-glyph ink boxes, which makes fractions and
+  roots nearly impossible to detect.
+- **DOCX/OMML.** `zipfile` and `xml.etree` from the standard library are enough; the OMML to
+  LaTeX converter is written here from the standard.
+- **OCR.** Tesseract (Apache-2.0) runs as an external process.
+- **Future formula models** (such as PP-FormulaNet) are mostly available in Python.
 
-| שיקול | Python | Node.js / TypeScript |
-|---|---|---|
-| מנוע PDF ברישיון מתירני שמחזיר קופסאות דיו (ink boxes) לכל גליף, נקודת בסיס, גופן וקווים וקטוריים | **pypdfium2** (‏Apache-2.0/BSD-3) – עוטף את PDFium של Chrome, מהיר ועמיד בקבצים פגומים | ‏pdf.js (Apache-2.0) נותן רק טקסט ברמת run ובלי קופסאות דיו לגליפים; זיהוי שברים ושורשים כמעט בלתי אפשרי |
-| ‏DOCX/OMML | ‏`zipfile` + `xml.etree` מהספרייה הסטנדרטית מספיקים; ממיר OMML→LaTeX נכתב כאן מהתקן | אפשרי, אבל אין יתרון |
-| ‏OCR עברי | ‏Tesseract (‏Apache-2.0) כתהליך חיצוני – זהה בשתי הסביבות | ‏tesseract.js קיים, אבל איטי בהרבה |
-| מודלים לזיהוי נוסחאות (אם יתווספו בעתיד) | רוב המודלים המתירניים (למשל PP-FormulaNet) זמינים ב-Python | כמעט אין |
+**The only runtime dependency is pypdfium2.** Everything else is the standard library.
 
-המסקנה: Python, בסביבה אחת. **התלות היחידה בזמן ריצה היא pypdfium2.** כל השאר – ספרייה סטנדרטית.
-
----
-
-## ארכיטקטורה
+## Architecture
 
 ```
 bytes ─► sniff_format ─► DocxReader ──┐
                      └─► PdfReader ───┼─► Document (IR) ─► serialize() ─► text v2
-                          ├ extract.py      (PDFium: גליפים, זהות גופן, קווים, תמונות)
-                          ├ glyphs/         (פענוח גופנים בלי מיפוי Unicode לפי צורת הגליף)
-                          ├ vector.py       (סיווג קווים: קו שבר/overline, |, √, ⟨⟩, שרטוטים)
-                          ├ mathengine.py   (שברים/שורשים/גבולות/אקסנטים + מנתח baseline → LaTeX)
-                          ├ layout.py       (שורות, טוקנים, אזורי מתמטיקה, bidi, פסקאות)
-                          └ ocr.py          (Tesseract לעמודים סרוקים)
+                          ├ extract.py      (PDFium: glyphs, font identity, lines, images)
+                          ├ glyphs/         (decode fonts with no Unicode mapping by glyph shape)
+                          ├ vector.py       (classify lines: fraction bar/overline, |, √, ⟨⟩, drawings)
+                          ├ mathengine.py   (fractions/roots/limits/accents + baseline parser -> LaTeX)
+                          ├ layout.py       (lines, tokens, math regions, bidi, paragraphs)
+                          └ ocr.py          (Tesseract for scanned pages)
 ```
 
-| מודול | תפקיד | איך מחליפים |
+| Module | Role | How to replace it |
 |---|---|---|
-| `model.py` | ייצוג ביניים (IR): פסקאות, נוסחאות inline/display, placeholders | – |
-| `serialize.py` | הרכיב היחיד שמכיר את פורמט הפלט | – |
-| `format.py` | מפרסר ייחוס לפורמט, לשימוש השלבים הבאים | – |
-| `latex/omml.py` | ‏OMML → LaTeX, ‏walk דטרמיניסטי על העץ | `ExtractorConfig(omml_converter=...)` (כל אובייקט עם `convert(element) -> str`) |
-| `readers/pdf/mathengine.py` | מנוע המתמטיקה ל-PDF (גיאומטרי, ללא ML) | `ExtractorConfig(pdf_math_engine=...)` – מימוש של הפרוטוקול `PdfMathEngine` |
-| `readers/pdf/ocr.py` | ‏OCR לעמודים סרוקים | `ExtractorConfig(ocr_engine=...)` – מימוש של `OcrEngine` (למשל אדפטר למודל שמזהה גם נוסחאות) |
-| `latex/plaintext.py` | זיהוי נוסחאות שהוקלדו כתווים רגילים (`a² + b² = c²`) | `detect_plain_math=False` לביטול |
-| `readers/pdf/glyphs/` | פענוח גופנים "מוצפנים" (בלי ToUnicode): רינדור כל גליף בבידוד, התאמה למאטלס צורות (`data/glyph_atlas.json.gz`), תיקון לפי הקשר, בדיקה צולבת אופציונלית מול OCR, הרכבת סוגריים גבוהים מחלקים | `ExtractorConfig(glyph_recognizer=...)` – מימוש של `GlyphRecognizer`; `recover_fonts=False` לביטול |
-| `readers/pdf/vector.py` | סיווג נתיבים וקטוריים לסימנים מתמטיים ולשרטוטים (שרטוטים מושמטים) | – |
-| `bidi.py` | מימוש עצמאי של UAX #9 (שלבי W/N/I/L2) להיפוך סדר חזותי → לוגי | – |
+| `model.py` | Intermediate representation: paragraphs, inline/display formulas, placeholders | – |
+| `serialize.py` | The only component that knows the output format | – |
+| `format.py` | Reference parser for the format, for later stages | – |
+| `latex/omml.py` | OMML to LaTeX, a deterministic tree walk | `ExtractorConfig(omml_converter=...)` |
+| `readers/pdf/mathengine.py` | Geometric PDF math engine, no ML | `ExtractorConfig(pdf_math_engine=...)` |
+| `readers/pdf/ocr.py` | OCR for scanned pages | `ExtractorConfig(ocr_engine=...)` |
+| `latex/plaintext.py` | Detects math typed as plain characters (`a² + b² = c²`) | `detect_plain_math=False` |
+| `readers/pdf/glyphs/` | Decodes fonts with no ToUnicode map by glyph shape | `ExtractorConfig(glyph_recognizer=...)`; `recover_fonts=False` |
+| `readers/pdf/vector.py` | Classifies vector paths as math symbols or drawings | – |
+| `bidi.py` | Own implementation of UAX #9 (W, N, I and L2 rules), visual to logical order | – |
 
-### איך זה עובד
+### How it works
 
-**DOCX.** הקובץ נקרא ישירות כ-ZIP+XML. הטקסט ב-Word שמור ממילא בסדר לוגי, לכן עברית ואנגלית מעורבות יוצאות נכון בלי היפוך. משוואות OMML (‏`m:oMath` בתוך שורה, `m:oMathPara` כבלוק) מומרות מבנית: ‏`m:f`→`\frac`, ‏`m:rad`→`\sqrt[n]{}`, ‏`m:nary`→`\sum/\int` עם גבולות, `m:d`→סוגריים, `m:m`→`matrix`, ‏`m:func`→`\sin`, ‏`m:acc`→`\hat/\vec`, מספור Word ‏(`#(1)`)→`\tag{1}`, טקסט עברי בתוך נוסחה→`\text{}`. בנוסף מטופלים: רשימות ממוספרות (כולל מספור עברי א/ב/ג), טבלאות, הערות שוליים, תיבות טקסט, שינויים במעקב (נמחק לא נכלל), `mc:AlternateContent`, וכתב עילי/תחתי רגיל (‏`x` + "2" בכתב עילי → `$x^{2}$`).
+**DOCX.** The file is read directly as ZIP and XML. Word stores text in logical order, so mixed
+Hebrew and English come out right without reordering. OMML equations are converted by structure:
+`m:f` to `\frac`, `m:rad` to `\sqrt[n]{}`, `m:nary` to `\sum`/`\int` with limits, `m:d` to
+delimiters, `m:m` to `matrix`, `m:func` to `\sin`, `m:acc` to `\hat`/`\vec`, Word numbering
+`#(1)` to `\tag{1}`, Hebrew inside a formula to `\text{}`. Numbered lists (including Hebrew
+א/ב/ג numbering), tables, footnotes, text boxes, tracked changes (deletions dropped),
+`mc:AlternateContent` and ordinary superscripts (`x` + superscript "2" to `$x^{2}$`) are handled
+too.
 
-**PDF עם שכבת טקסט.**
-1. PDFium מחזיר לכל גליף: Unicode, קופסת דיו, נקודת מוצא (baseline), גודל, גופן. קווים וקטוריים דקים נאספים כ"קווים" (קו שבר, קו שורש).
-2. מנוע המתמטיקה בונה מבנים אנכיים מלמטה למעלה (הפנימי קודם): שבר = קו שמעליו מונה ומתחתיו מכנה צמודים, בתוך רוחב הקו וללא שכנים על אותו קו בסיס (כך קו תחתון של מילה או גבול טבלה לא יזוהו כשבר); שורש = סימן √ שבראשו קו; ∑/∏/lim עם גבולות מעל/מתחת; אקסנטים (`\hat`, `\bar`, `\vec`) לפי חפיפה אנכית.
-3. השורות נבנות לפי קו בסיס; גליפים קטנים מוגבהים/מונמכים מוצמדים כחזקות/אינדקסים.
-4. כל שורה מחולקת לטוקנים, וכל טוקן מסווג: עברית, פרוזה לטינית, מתמטיקה "חזקה" (גופן מתמטי כמו CMMI/Cambria Math, תו מתמטי, מבנה), או "חלשה" (ספרות/סוגריים). רצף טוקנים מתמטיים עם לפחות אחד חזק = נוסחה.
-5. הנוסחה הופכת ליחידה אחת אטומה LTR, ואז אלגוריתם ה-bidi הופך את השורה מסדר חזותי לסדר לוגי (כולל שיקוף סוגריים). שורה שכולה נוסחה → `$$...$$`, ומספר משוואה בשוליים → `\tag`.
-6. שורות מאוחדות לפסקאות; מספרי עמודים וכותרות רצות חוזרות מוסרים.
+**PDF with a text layer.**
+1. PDFium returns every glyph's Unicode, ink box, baseline origin, size and font. Thin vector
+   lines (fraction bars, root bars) are collected.
+2. The math engine builds vertical structures inside out. A fraction is a line with a numerator
+   right above and a denominator right below, within its width and with no neighbors on the same
+   baseline, so an underline or table border is not taken for a fraction. A root is a √ with a
+   bar on top. Σ, Π and lim take limits above and below; accents (`\hat`, `\bar`, `\vec`) are
+   found by vertical overlap.
+3. Lines are built by baseline; small raised or lowered glyphs attach as powers and indices.
+4. Each line is split into tokens, classified as Hebrew, Latin prose, "strong" math (a math font
+   such as CMMI or Cambria Math, a math character, a structure) or "weak" math (digits,
+   brackets). A run of math tokens with at least one strong token is a formula.
+5. The formula becomes one atomic left-to-right unit, then the bidi algorithm turns the line from
+   visual to logical order, mirroring brackets. A line that is all formula becomes `$$...$$`,
+   and an equation number in the margin becomes `\tag`.
+6. Lines are joined into paragraphs; page numbers and repeated running heads are removed.
 
-**PDF עם גופנים בלי מיפוי Unicode.** מדפסות PDF כמו PScript5 + Ghostscript מטמיעות תת-גופני TrueType שבהם הקודים ניתנים לפי סדר השימוש ואין טבלת ToUnicode, ולכן שכבת הטקסט נראית כ"זבל". במקום לשלוח את העמוד ל-OCR (שמאבד את כל המבנה המתמטי), כל גליף ייחודי מרונדר לבד, ומתואר כרשת כיסוי 16×16 + קופסת דיו + טופולוגיה (רכיבים וחורים). התיאור מושווה לאטלס של ~2,900 גליפי ייחוס מגופני OFL (מתמטיקה, עברית, לטינית). אחר כך ההחלטה מתוקנת לפי הקשר (עברית מול לטינית, אות סופית מול רגילה) ובדיקה צולבת מול OCR של מילים בודדות. הקואורדינטות והמבנה נשמרים, וכך גם השברים, האינדקסים והמטריצות. גליף שלא פוענח בביטחון נספר ב-`stats.unresolved_glyphs` ומופיעה אזהרה.
+**PDF fonts with no Unicode mapping.** PDF printers such as PScript5 with Ghostscript embed
+TrueType subsets whose codes follow order of use, with no ToUnicode table, so the text layer
+looks like garbage. Instead of OCR on the page, which loses all math structure, each distinct
+glyph is rendered alone and described by a 16×16 coverage grid, its ink box and its topology
+(components and holes). The description is matched against an atlas of about 2,900 reference
+glyphs from OFL fonts (math, Hebrew, Latin). The choice is then corrected by context (Hebrew vs
+Latin, final vs regular letter forms) and optionally cross-checked by OCR of single words.
+Coordinates and structure survive, so fractions, indices and matrices do too. A glyph that is
+not decoded with confidence is counted in `stats.unresolved_glyphs` with a warning.
 
-**PDF סרוק.** עמוד בלי שכבת טקסט מרונדר ב-300 DPI ומועבר ל-Tesseract עם `heb+eng`. נוסחאות בעמוד סרוק מזוהות רק אם הן ליניאריות (ראו מגבלות).
+**Scanned PDF.** A page with no text layer is rendered at 300 DPI and sent to Tesseract with
+`heb+eng`. Formulas on scanned pages are recognized only when they are linear (see limitations).
 
----
+## Licensing
 
-## רישוי
+### What was chosen
 
-### מה נבחר
-
-| רכיב | רישיון | למה נבחר | חובות |
+| Component | License | Why | Obligations |
 |---|---|---|---|
-| **pypdfium2** 5.13.0 | ‏Apache-2.0 או BSD-3-Clause (בחירה) | המנוע היחיד בעולם ה-permissive שנותן קופסאות דיו מדויקות לגליפים + קווים וקטוריים; עמיד בקבצים פגומים | שימור הודעת זכויות יוצרים והסתייגות אחריות בהפצה |
-| PDFium (בתוך pypdfium2) | ‏BSD-3-Clause | – | כנ"ל |
-| ספריות מקומפלות בתוך PDFium | FreeType (‏FTL), libjpeg-turbo (‏IJG/BSD), libpng, zlib, lcms2 (MIT), OpenJPEG (BSD-2), libtiff, Abseil (Apache-2.0), ICU (Unicode) ועוד | – | **FreeType ו-libjpeg דורשים ייחוס בתיעוד** – הנוסח המדויק ב-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
-| ספריית Python הסטנדרטית (`xml.etree`/expat, `zipfile`, `unicodedata`) | ‏PSF-2.0 / MIT | פרסור XML מוקשח ל-DOCX | שימור הודעה |
-| **Tesseract** 5.x + Leptonica (אופציונלי, תהליך חיצוני) | ‏Apache-2.0 / BSD-2 | ה-OCR המתירני הבשל ביותר לעברית | שימור LICENSE/NOTICE אם מפיצים את הבינארי (למשל בתמונת Docker ללקוח) |
-| מודל `heb.traineddata` (‏tessdata_best) | ‏Apache-2.0 | **רישיון המשקולות נבדק בנפרד** – גם הוא Apache-2.0 | כנ"ל |
-| אטלס הגליפים `data/glyph_atlas.json.gz` | נגזר מגופני **SIL OFL 1.1** (‏STIX Two Math, ‏Libertinus Math, ‏Noto Sans Math, ‏Tinos, ‏Arimo, ‏David Libre, ‏Frank Ruhl Libre, ‏Miriam Libre, ‏Alef, ‏Noto Serif/Sans Hebrew) | רק גופנים ברישיון OFL, שמתיר שימוש מסחרי. האטלס מכיל רק תיאורי צורה מרונדרים (רשתות 16×16), לא את תוכנת הגופן. | OFL אינו חל על פלט מרונדר. ייחוס בכל זאת נשמר ב-THIRD_PARTY_NOTICES.md. fontTools (‏MIT) משמש רק בבניית האטלס. |
+| **pypdfium2** 5.13.0 | Apache-2.0 or BSD-3-Clause | The only permissive engine with exact glyph ink boxes and vector lines; robust on damaged files | Keep copyright and disclaimer when redistributing |
+| PDFium (inside pypdfium2) | BSD-3-Clause | – | Same |
+| Libraries compiled into PDFium | FreeType (FTL), libjpeg-turbo (IJG/BSD), libpng, zlib, lcms2 (MIT), OpenJPEG (BSD-2), libtiff, Abseil (Apache-2.0), ICU (Unicode) and others | – | **FreeType and libjpeg require attribution in documentation**; exact wording in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
+| Python standard library (`xml.etree`/expat, `zipfile`, `unicodedata`) | PSF-2.0 / MIT | Hardened XML parsing for DOCX | Keep notice |
+| **Tesseract** 5.x + Leptonica (optional, external process) | Apache-2.0 / BSD-2 | The most mature permissive OCR for Hebrew | Keep LICENSE/NOTICE if you ship the binary (for example in a Docker image) |
+| `heb.traineddata` (tessdata_best) | Apache-2.0 | The model weights' license was checked separately | Same |
+| Glyph atlas `data/glyph_atlas.json.gz` | Derived from **SIL OFL 1.1** fonts (STIX Two Math, Libertinus Math, Noto Sans Math, Tinos, Arimo, David Libre, Frank Ruhl Libre, Miriam Libre, Alef, Noto Serif/Sans Hebrew) | OFL fonts only, which allow commercial use. The atlas holds rendered shape descriptors (16×16 grids), not font programs | OFL does not cover rendered output; attribution is kept anyway. fontTools (MIT) is used only to build the atlas |
 
-ההסבר המלא, כולל כל ספרייה מקומפלת, ב-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). הקוד מופץ כקוד מקור ברישיון Apache-2.0 (ראו [LICENSE](LICENSE) ו-[NOTICE](NOTICE)); מי שמפיץ חבילה בנויה או תמונת Docker צריך לצרף את ההודעות האלה.
+hebmath is distributed as source under Apache-2.0 (see [LICENSE](LICENSE) and
+[NOTICE](NOTICE)). Anyone who ships a built package or a Docker image should include these
+notices.
 
-### מה נבדק ונדחה
+### What was considered and rejected
 
-| חלופה | הבעיה |
+| Alternative | Problem |
 |---|---|
-| ‏PyMuPDF / MuPDF | ‏**AGPL-3.0** – בשירות רשת מחייב חשיפת קוד המקור של השירות (או רישיון מסחרי בתשלום) |
-| ‏**lxml** | הספרייה עצמה BSD, אבל ה-wheels הרשמיים **מקמפלים סטטית את GNU libiconv ב-LGPL-2.1** (מצוין ב-LICENSES.txt של החבילה). הוחלפה ב-`xml.etree` הסטנדרטי |
-| ‏python-bidi | ‏**LGPL** – לכן נכתב מימוש עצמאי של UAX #9 |
-| ‏Nougat (Meta) | הקוד MIT, אבל **המשקולות CC-BY-NC** (לא מסחרי) |
-| ‏texify | קוד **GPL-3.0**, משקולות **CC-BY-SA-4.0** |
-| ‏Surya / Marker (Datalab) | משקולות בגרסאות **CC-BY-NC-SA** / ‏**OpenRAIL-M מותאם** עם הגבלות הכנסות/מימון וסעיף "מתחרה" |
-| ‏MinerU | רישיון מותאם (Apache-2.0 + תנאים נוספים: ספי MAU/הכנסות, חובת ייחוס בשירות מקוון) – לא רישיון מתירני "נקי" |
-| ‏pix2tex (LaTeX-OCR) | הקוד MIT, אבל לא מצוין רישיון למשקולות, והן אומנו על im2latex-100k (מקורות arXiv) ללא רישיון ברור – סיכון משפטי |
-| ‏MathType / OMML2MML.XSL של Microsoft | קנייניים |
+| PyMuPDF / MuPDF | **AGPL-3.0**: a network service must publish its source, or buy a commercial license |
+| **lxml** | The library is BSD, but the official wheels **statically link GNU libiconv under LGPL-2.1** (stated in the package's LICENSES.txt). Replaced by the standard `xml.etree` |
+| python-bidi | **LGPL**, so UAX #9 was implemented here |
+| Nougat (Meta) | Code is MIT, but the **weights are CC-BY-NC** (non-commercial) |
+| texify | Code **GPL-3.0**, weights **CC-BY-SA-4.0** |
+| Surya / Marker (Datalab) | Weights under **CC-BY-NC-SA** or a **modified OpenRAIL-M** with revenue and funding limits and a "competitor" clause |
+| MinerU | Custom license (Apache-2.0 plus extra terms: MAU and revenue thresholds, attribution in online services) |
+| pix2tex (LaTeX-OCR) | Code is MIT, but the weights have no stated license and were trained on im2latex-100k (arXiv sources) with no clear license |
+| MathType / Microsoft's OMML2MML.XSL | Proprietary |
 
-**מנוע ML עתידי שמתאים לאילוץ:** ‏PP-FormulaNet של PaddleOCR – הקוד וגם כרטיס המודל מצהירים Apache-2.0. אפשר לחבר אותו כ-`OcrEngine`/`PdfMathEngine` בלי לשנות את שאר הקוד; לפני כן יש לבדוק את רישיון כל התלויות (paddlepaddle וכו') ולקבע גרסה וזרע.
+**A future ML engine that fits:** PaddleOCR's PP-FormulaNet, whose code and model card are both
+Apache-2.0. It can be plugged in as an `OcrEngine` or `PdfMathEngine` without changing the rest;
+check the licenses of all its dependencies first and pin a version and seed.
 
-> הבדיקה הזו אינה ייעוץ משפטי. כדאי שיועץ משפטי יעבור על הטקסטים המלאים ב-`site-packages/pypdfium2-*/licenses/` לפני הפצה.
+> This review is not legal advice. Have counsel read the full texts in
+> `site-packages/pypdfium2-*/licenses/` before distributing binaries.
 
----
+## Settings worth knowing (`ExtractorConfig`)
 
-## הגדרות (`ExtractorConfig`) שכדאי להכיר
-
-| שדה | ברירת מחדל | מה עושה |
+| Field | Default | What it does |
 |---|---|---|
-| `math_line_breaks` | `"formulas"` | `"formulas"`: כל נוסחה שאינה סמל בודד בשורה משלה. `"all"`: כל נוסחה. `"none"`: פורמט v1. |
-| `recover_fonts` | `True` | פענוח גופנים בלי Unicode לפי צורה. `False` מחזיר את ההתנהגות הישנה (OCR לעמוד). |
-| `recovery_ocr_pages` | `6` | מספר עמודים מקסימלי ל-OCR כבדיקה צולבת של הפענוח. `0` מבטל (בקובץ האלגברה: ~10 שניות במקום ~25). |
-| `glyph_recognizer` | `None` (אטלס) | מזהה גליפים חלופי, למשל מודל, שמממש `candidates/tall/distance_to/version` |
-| `pdf_math_engine`, `omml_converter`, `ocr_engine` | מובנים | החלפת מנוע המתמטיקה, ממיר OMML או OCR |
-| `enable_ocr`, `detect_plain_math`, `page_markers` | `True`, `True`, `False` | כמו בגרסה 1.0 |
+| `math_line_breaks` | `"formulas"` | `"formulas"`: every formula that is not a single symbol on its own line. `"all"`: every formula. `"none"`: format v1 |
+| `recover_fonts` | `True` | Decode fonts with no Unicode mapping by shape. `False` falls back to OCR of the page |
+| `recovery_ocr_pages` | `6` | Maximum pages OCR'd to cross-check the decoding. `0` turns it off (on one test file: about 10 s instead of 25) |
+| `glyph_recognizer` | `None` (atlas) | An alternative glyph recognizer, such as a model, implementing `candidates/tall/distance_to/version` |
+| `pdf_math_engine`, `omml_converter`, `ocr_engine` | built in | Replace the math engine, the OMML converter or the OCR |
+| `enable_ocr`, `detect_plain_math`, `page_markers` | `True`, `True`, `False` | As in version 1.0 |
 
----
+## Stability and reproducibility
 
-## יציבות ושחזוריות
+- Every method is deterministic: no statistical model, no randomness, no dependence on `dict` or
+  `set` order. Every sort uses a full key with a tie-breaker (the glyph's position in the
+  content stream).
+- `test_deterministic_across_processes` runs every file in two processes with different
+  `PYTHONHASHSEED` values and checks the output is byte-identical.
+- The versions that determine the output are returned in `result.engines` (hebmath, pypdfium2,
+  PDFium, Tesseract). Store them next to the text.
+- The glyph atlas is built once by `tools/build_glyph_atlas.py` from fonts at pinned commits and
+  ships as package data. There is no training at run time. Its version is in
+  `engines.glyph_recognizer`. The OCR cross-check changes a decision only when it is
+  unambiguous.
+- pypdfium2 is pinned to an exact version in `pyproject.toml`. The golden files are a Linux
+  reference (as in CI); two golden tests fail on macOS. Run Tesseract single-threaded
+  (`OMP_THREAD_LIMIT=1`), because multi-threaded runs are not fully deterministic.
+- Upgrading any of these can change the output, which is why `extractor_version` is stored in
+  the report and the golden-file tests catch any change.
 
-* כל השיטות דטרמיניסטיות – אין מודל סטטיסטי, אין אקראיות, ואין תלות בסדר של `dict`/`set`. כל מיון בקוד משתמש במפתח מלא עם שובר שוויון (סדר הגליף בזרם התוכן).
-* הבדיקה `test_deterministic_across_processes` מריצה את כל הקבצים בשני תהליכים עם `PYTHONHASHSEED` שונה ומוודאת פלט זהה ברמת הבייט.
-* הגרסאות שקובעות את הפלט מוחזרות ב-`result.engines` (‏hebmath, ‏pypdfium2, ‏PDFium, ‏Tesseract) – כדאי לשמור אותן לצד הטקסט.
-* אטלס הגליפים (`data/glyph_atlas.json.gz`) נבנה פעם אחת ב-`tools/build_glyph_atlas.py` מגופנים בקומיט מקובע, ונכנס לחבילה כקובץ נתונים. בזמן ריצה אין אימון ואין אקראיות. הגרסה שלו מופיעה ב-`engines.glyph_recognizer`. הבדיקה הצולבת מול OCR משנה החלטה רק כשהיא חד-משמעית, ותוצאת קובץ האלגברה זהה עם OCR ובלעדיו.
-* `pypdfium2` מקובע לגרסה מדויקת ב-`pyproject.toml`. קבצי ה-golden הם ייחוס של Linux (כמו ב-CI); על macOS שתי בדיקות golden נכשלות. כדאי להריץ את Tesseract בחוט אחד (`OMP_THREAD_LIMIT=1`), כי ריצה מרובת חוטים אינה דטרמיניסטית לחלוטין.
-* שדרוג של אחד מהם עלול לשנות את הפלט. לכן `extractor_version` נשמר בדו"ח, והבדיקות מול קבצי golden יתפסו כל שינוי.
+## Edge cases
 
-## מקרי קצה
-
-| מקרה | התנהגות |
+| Case | Behavior |
 |---|---|
-| מסמך עתיר נוסחאות | נבדק על 100 עמודים מעורבים: ~1.7 שניות |
-| ללא שכבת טקסט (סרוק) | ‏OCR עברית+אנגלית, אזהרה בדו"ח, `stats.pages_ocr`. ללא Tesseract: ‏`[[hebmath:unreadable-page]]` + אזהרה |
-| שכבת טקסט "זבל" (גופנים בלי Unicode) | פענוח לפי צורת הגליף (ראו למעלה), בלי OCR לעמוד. אם הפענוח כבוי (`recover_fonts=False`) – מעל 30% תווים לא ממופים → OCR לעמוד |
-| תמונות, דיאגרמות, שרטוטים וקטוריים | מושמטים בלי סימון; תוויות טקסט בתוך שרטוט מושמטות (`stats.figure_glyphs_dropped`) |
-| גליף ש-PDFium מדווח עליו כרווח (קוד 0x20 בגופן מוצפן) | משוחזר לפי דיו שלא מכוסה (`stats.restored_glyphs`) |
-| קובץ פגום / קטוע | ‏`corrupt_file` (‏PDFium מתקן קבצים קלים בעצמו). בדיקת fuzzing של 300 קבצים משובשים: אפס קריסות |
-| PDF מוצפן | ‏`encrypted_file`; ‏PDF עם סיסמת בעלים בלבד נקרא כרגיל |
-| ‏`.doc` ישן / DOCX מוצפן | ‏`unsupported_format` / ‏`encrypted_file` |
-| ‏zip bomb, ‏XXE/DTD ב-DOCX | ‏`resource_limit` / ‏`corrupt_file` |
-| מסמך בלי מתמטיקה | טקסט נקי בלי `$` (נבדק) |
-| עמוד אחד שבור במסמך תקין | העמוד מסומן, שאר המסמך מחולץ |
+| Formula-heavy document | Tested on 100 mixed pages: about 1.7 s |
+| No text layer (scanned) | Hebrew and English OCR, a warning, `stats.pages_ocr`. Without Tesseract: `[[hebmath:unreadable-page]]` and a warning |
+| Garbage text layer (fonts with no Unicode) | Decoded by glyph shape, no page OCR. With `recover_fonts=False`: over 30% unmapped characters sends the page to OCR |
+| Images, diagrams, vector drawings | Dropped with no marker; text labels inside drawings are dropped too (`stats.figure_glyphs_dropped`) |
+| A glyph PDFium reports as a space (code 0x20 in an encoded font) | Restored from uncovered ink (`stats.restored_glyphs`) |
+| Corrupt or truncated file | `corrupt_file` (PDFium repairs light damage itself). A fuzz test of 300 damaged files: zero crashes |
+| Encrypted PDF | `encrypted_file`; a PDF with only an owner password is read normally |
+| Old `.doc` / encrypted DOCX | `unsupported_format` / `encrypted_file` |
+| Zip bomb, XXE/DTD in DOCX | `resource_limit` / `corrupt_file` |
+| Document with no math | Clean text with no `$` (tested) |
+| One broken page in a good document | The page is marked; the rest is extracted |
 
-ההמלצה: להריץ כל חילוץ ב-worker נפרד (תהליך), עם timeout חיצוני. PDFium אינו thread-safe.
+Run each extraction in its own worker process with an external timeout: PDFium is not
+thread-safe.
 
----
+## Known limitations
 
-## מגבלות ידועות
+1. **Formulas on scanned pages.** Tesseract does not see 2D structure. Fractions, powers and
+   roots in a scan come out garbled or are dropped; only simple linear formulas are recognized.
+   The fix is a model such as PP-FormulaNet as an `OcrEngine`.
+2. **Old equations (Equation Editor 3.0 / MathType)** in DOCX are binary OLE objects. They are
+   marked `[[hebmath:math-object]]` and not converted. A formula saved as an image is dropped
+   with the other images, per format v2.
+3. **Partial PDF structures.** Matrices, `cases` and tall brackets are recognized (also when a
+   bracket is built from several pieces), but a sparse or diagonal matrix gets an approximate
+   row and column layout. Column separators (`P=(v_1|\dots|v_n)`), aligned `align` systems and
+   `\overbrace`/`\underbrace` are not recognized as structures.
+4. **Fonts with no Unicode.** Shape decoding is very accurate for common fonts
+   (Times/Arial/David/Symbol/Cambria). For a rare Hebrew font without OCR accuracy drops (in the
+   FreeSerif test file: similarity about 0.67 without OCR, 0.88 with it). Type3 fonts with no
+   Unicode are decoded per page. The work is pure Python: about 10 s for 17 pages of such a file
+   (a normal file does not pay this cost).
+5. **Two-column layouts** are not supported: lines from both columns at the same height merge.
+   Student summaries are almost always single-column.
+6. **Subscript vs footnote** is decided by context: a raised digit next to a Hebrew word stays
+   text ("מילה1").
+7. **Chrome PDFs with MathML on an RTL page.** Chromium writes mirrored codes for some symbols in
+   the text layer (`<`/`>`, `∈`/`∋`) even though the page looks right. Mirrored brackets are fixed
+   automatically; relation signs cannot always be. Word, LibreOffice and LaTeX are not affected.
+8. **Niqqud** is kept as in the PDF. Diacritics the PDF split from their letter are reattached by
+   overlap, so rare cases may come out in a different order.
+9. **Font sizes and colors** are not kept in the text; headings and emphasis are reported in the
+   structure.
+10. **Math typed as plain text in Word** is recognized only when it has an unambiguous math sign
+    (`=`, `²`, `√`, a Greek letter). "5 + 3" with no equals sign stays text, on purpose.
+11. **An operator touching Hebrew.** When a sign such as `-` or `=` sits between a Hebrew word
+    and a formula with no space, its logical order is ambiguous, and in rare cases it attaches to
+    the wrong side.
 
-1. **נוסחאות בעמודים סרוקים**: ‏Tesseract לא מזהה מבנה דו-ממדי. שברים, חזקות ושורשים בסריקה יוצאים כטקסט משובש, ולפעמים נזרקים; רק נוסחאות ליניאריות פשוטות מזוהות. הפתרון: לחבר מודל כמו PP-FormulaNet כ-`OcrEngine`.
-2. **משוואות ישנות (Equation Editor 3.0 / MathType)** ב-DOCX הן אובייקטי OLE בינאריים – מסומנות `[[hebmath:math-object]]` ולא מומרות. נוסחה שנשמרה כתמונה (צילום מסך של נוסחה) מושמטת יחד עם שאר התמונות, לפי החוזה של פורמט v2.
-3. **PDF – מבנים חלקיים**: מטריצות, `cases` וסוגריים גבוהים מזוהים (גם כשהסוגר מורכב מכמה חלקים). אבל מטריצה דלילה או אלכסונית (λ₁ … עם אפסים גדולים באמצע) יוצאת עם פריסת שורות/עמודות משוערת. סימון עמודות בקווים אנכיים (`P=(v_1|\dots|v_n)`), מערכות `align` עם יישור ו-`\overbrace/\underbrace` אינם מזוהים כמבנה.
-4. **PDF – גופנים בלי Unicode**: פענוח לפי צורה מדויק מאוד לגופנים נפוצים (Times/Arial/David/Symbol/Cambria). בגופן עברי נדיר ובלי OCR הדיוק יורד (בקובץ הבדיקה עם FreeSerif: דמיון ~0.67 בלי OCR, ~0.88 עם OCR). גופני Type3 בלי Unicode מפוענחים לכל עמוד בנפרד. העבודה היא Python טהור: כ-10 שניות ל-17 עמודים בקובץ כזה (קובץ תקין לא משלם על זה).
-5. **פריסה בשני טורים** אינה נתמכת: שורות מטורים שונים באותו גובה יתמזגו. סיכומי סטודנטים הם כמעט תמיד בטור אחד.
-6. **הבחנה בין אינדקס תחתון לבין הערת שוליים** מבוססת על הקשר: ספרה מוגבהת ליד מילה עברית נשארת טקסט ("מילה1").
-7. **PDF מ-Chrome עם MathML בעמוד RTL**: Chromium כותב בשכבת הטקסט קודים משוקפים לחלק מהסימנים (`<`↔`>`, ‏`∈`↔`∋`) אף שהתצוגה תקינה. סוגריים משוקפים מתוקנים אוטומטית; סימני יחס לא תמיד אפשר לתקן. Word, ‏LibreOffice ו-LaTeX אינם מושפעים.
-8. **ניקוד** נשמר כפי שהוא ב-PDF; צירוף מחדש של סימני ניקוד שה-PDF פיצל מהאות מתבצע לפי חפיפה, ולכן יכולים להיות מקרים בודדים של סדר שונה.
-9. **כותרות, הדגשות וגדלי גופן** אינם נשמרים – רק הטקסט והמתמטיקה.
-10. נוסחה שהוקלדה ב-Word כטקסט רגיל מזוהה רק אם יש בה סימן מתמטי חד-משמעי (`=`, ‏`²`, ‏`√`, אות יוונית וכו'). ‏"5 + 3" בלי סימן שוויון נשאר טקסט, וזה מכוון.
-11. **סדר חזותי של אופרטור צמוד לעברית**: כשסימן כמו `-` או `=` נמצא בין מילה עברית לנוסחה בלי רווח, הסדר הלוגי שלו עמום, ויכולים להיות מקרים בודדים שבהם הוא מוצמד לצד הלא נכון.
-
----
-
-## פיתוח ובדיקות
+## Development and tests
 
 ```bash
 pip install -e .[dev]
-python tests/make_fixtures.py     # בונה את הקבצים (חלקם דורשים pdflatex/Chromium/qpdf)
+python tests/make_fixtures.py     # builds the fixtures (some need pdflatex, Chromium or qpdf)
 pytest -q
 ```
 
-קורפוס הבדיקה כולל DOCX עברי עם OMML (שברים, שורשים, סכומים, מטריצות, מספור, טבלאות, הערות שוליים), ‏PDF מ-pdfLaTeX, ‏PDF מ-Chromium עם עברית+MathML, ‏PDF מ-LibreOffice, ‏PDF סרוק, ו-8 קבצים עוינים או פגומים. הפלט של כל קובץ מושווה לקובץ golden.
+The test corpus includes a Hebrew DOCX with OMML (fractions, roots, sums, matrices, numbering,
+tables, footnotes), PDFs from pdfLaTeX, from Chromium with Hebrew and MathML, and from
+LibreOffice, a scanned PDF, and eight hostile or damaged files. Each file's output is compared
+with a golden file. All fixtures are synthetic.

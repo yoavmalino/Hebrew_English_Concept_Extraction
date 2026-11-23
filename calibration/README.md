@@ -5,7 +5,8 @@ The code that chose the stage-5 weights and the stage-6 settings now in `concept
 `ENTRY_THRESHOLD`, `REPLACE_MARGIN`). The data is not in this repository: point
 `--data-dir` or `TACTIMIND_DATA_DIR` at a folder laid out like this:
 
-- `training_set/<course>/`: the course files; the summary's name contains `סיכום`.
+- `training_set/<course>/`: the course files; the summary's file name contains the Hebrew
+  word `סיכום` ("summary").
 - `training_set_gold/<course>/concepts.gold.json`: dev gold from the model committee
   (`scripts/concept_committee.py`), plus the model caches (`_normalization_cache`, ...).
 - `training_set_heldout_gold/<course>/concepts.gold.json`: held-out gold, never tuned on.
