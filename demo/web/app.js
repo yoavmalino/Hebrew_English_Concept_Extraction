@@ -67,8 +67,8 @@
   let currentOriginal = null;
   let currentIsGenerated = false;
   let currentStage = "stage1";
-  // "examples" (the default) or "upload". Each mode keeps its own last document, so switching
-  // back and forth never loses a result: {data, isGenerated, original}.
+  // "examples" (the default) or "upload", and the document each mode shows:
+  // {data, isGenerated, original}. Entering "upload" clears its document (see `setMode`).
   let mode = "examples";
   const views = { examples: null, upload: null };
   let pdfjsPromise = null;
@@ -595,11 +595,18 @@
   }
 
   /**
-   * Switch between the samples and the user's own file; each keeps its last result.
+   * Switch between the samples and the user's own file.
+   *
+   * The samples keep the last one opened. "Your own file" always starts empty: a result from an
+   * earlier upload is dropped, so the page never shows a document the visitor did not just send.
    *
    * @param {string} next "examples" or "upload"
    */
   function setMode(next) {
+    if (next === "upload" && views.upload) {
+      if (views.upload.original) URL.revokeObjectURL(views.upload.original.url);
+      views.upload = null;
+    }
     mode = next;
     modeBox
       .querySelectorAll("button")
