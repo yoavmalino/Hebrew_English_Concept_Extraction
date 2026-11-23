@@ -8,11 +8,20 @@
 
   const config = window.DEMO_CONFIG || {};
   const examplesBox = document.getElementById("examples");
-  const generatedNotice = document.getElementById("generated");
   const uploadForm = document.getElementById("upload");
   const statusLine = document.getElementById("status");
+  const progressBox = document.getElementById("progress");
+  const uploadButton = document.querySelector(".upload-button");
+  // Matches the API's own limit (demo/api/analysis.py MAX_FILE_BYTES), checked here to fail fast.
+  const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+  // A cold start on the free host plus a long file stays well under this.
+  const UPLOAD_TIMEOUT_MS = 180000;
+  // After this long the wait is most likely the server waking up, so the hint says so.
+  const WAKE_HINT_SECONDS = 10;
   const tabsBox = document.getElementById("tabs");
   const stagePanel = document.getElementById("stage");
+  const modeBox = document.getElementById("mode");
+  const examplesPane = document.getElementById("examples-pane");
 
   const SOURCE_LABELS = {
     definition: "definition",
@@ -56,7 +65,12 @@
   // The original document of the current example or upload: {url, format, isHebrew, node}. `node` caches
   // the rendered pages so switching tabs does not render them again.
   let currentOriginal = null;
+  let currentIsGenerated = false;
   let currentStage = "stage1";
+  // "examples" (the default) or "upload". Each mode keeps its own last document, so switching
+  // back and forth never loses a result: {data, isGenerated, original}.
+  let mode = "examples";
+  const views = { examples: null, upload: null };
   let pdfjsPromise = null;
   let docxPromise = null;
 
@@ -330,9 +344,8 @@
       id: "stage1",
       title: "1 · Extraction",
       explain:
-        "hebmath reads the PDF or DOCX: text in reading order with formulas as LaTeX, plus the " +
-        "structure the later stages need (headings, units such as definitions and examples, and " +
-        "which words are bold, underlined, larger or on their own line).",
+        "Reads the PDF or DOCX in true reading order, with every formula as LaTeX. Keeps the " +
+        "structure later stages rely on: headings, definitions, examples, emphasis.",
       render(data) {
         const s = data.stage1;
         const units = Object.entries(s.units).sort((a, b) => b[1] - a[1]);
@@ -360,29 +373,19 @@
         ];
         if (currentOriginal) {
           out.push(
-            el("h3", "Original and extracted text"),
-            el(
-              "p",
-              "Left: the document as its author made it. Right: the whole text stage 1 extracts " +
-                "from it, in reading order with formulas as LaTeX. Each side scrolls on its own.",
-              "explain",
-            ),
+            el("h3", "Original vs. extracted"),
+            el("p", "Left: the original. Right: what stage 1 extracts. Each side scrolls.", "explain"),
             compareView(fullText),
           );
         } else {
           out.push(
-            el("h3", "Full extracted text"),
-            el(
-              "p",
-              "The whole document as stage 1 outputs it: reading order, formulas as LaTeX. " +
-                "Scroll inside the box.",
-              "explain",
-            ),
+            el("h3", "Extracted text"),
+            el("p", "Everything stage 1 extracts. Scroll inside the box.", "explain"),
             fullText,
           );
         }
         if (s.text_truncated) {
-          out.push(el("p", "The text is cut here because the document is very long.", "explain"));
+          out.push(el("p", "Cut here: the document is very long.", "explain"));
         }
         out.push(
           el("h3", "Units by type"),
@@ -407,10 +410,9 @@
       id: "stage2",
       title: "2 · Candidates",
       explain:
-        "Every phrase that could name a concept, from seven sources (definitions, headings, " +
-        "emphasis, repeated phrases, English glosses, math operators and label lines). Hebrew " +
-        "prefixes are removed only when the bare word appears in the same file. Most candidates " +
-        "are noise; the later stages filter them.",
+        "Every phrase that might be a concept, from seven sources: definitions, headings, " +
+        "emphasis, repeated phrases, English glosses, math operators, labels. Most are noise; " +
+        "the next stages filter them.",
       render(data) {
         const s = data.stage2;
         return [
@@ -430,21 +432,21 @@
     {
       id: "stage3",
       title: "3 · Images",
+      soon: true,
       explain:
-        "Text inside images and drawings. This stage is not implemented yet, so the pipeline " +
-        "goes from stage 2 to stage 4.",
+        "In development: extracting and tagging concept candidates from images and diagrams. " +
+        "For now the pipeline goes straight from stage 2 to stage 4.",
       render() {
-        return [];
+        return [el("p", "Coming next", "soon-badge")];
       },
     },
     {
       id: "stage4",
       title: "4 · Merging",
       explain:
-        "Rules propose pairs of candidates that may be one concept (an English term in " +
-        "parentheses, an acronym, spelling variants, typos). In the full pipeline a model " +
-        "decides most pairs; in this demo only rule-safe pairs merge and the rest stay apart. " +
-        "A fragment that appears only inside a longer name is absorbed into it.",
+        "Finds different names for one concept: English in parentheses, acronyms, spelling " +
+        "variants, typos. Here only rule-safe pairs merge; the full pipeline has a model decide " +
+        "the rest.",
       render(data) {
         const s = data.stage4;
         const finders = Object.entries(s.pairs_by_finder).map(([f, n]) => [
@@ -478,10 +480,8 @@
       id: "stage5",
       title: "5 · Importance",
       explain:
-        "Each concept gets a score from signals seen in the document, with weights calibrated on " +
-        "real course summaries. A signal that marks too much of a document (everything bold) " +
-        "passes its weight to the others. T, how much more frequent a word is here than in other " +
-        "courses, is off in the demo.",
+        "Scores each concept from signals in the document, with weights calibrated on real " +
+        "course summaries. One signal, rarity across courses, is off in this demo.",
       render(data) {
         const s = data.stage5;
         const signals = Object.keys(SIGNAL_LABELS);
@@ -495,7 +495,7 @@
         ]);
         return [
           el("h3", "Top concepts by importance"),
-          el("p", "Tags show the signals at 0.5 or more for that concept.", "explain"),
+          el("p", "Tags: signals at 0.5 or higher.", "explain"),
           table(["concept", "importance", "strong signals"], rows),
         ];
       },
@@ -504,9 +504,9 @@
       id: "stage6",
       title: "6 · Selection",
       explain:
-        "The learning space's nodes: defined concepts, named results and heading topics enter " +
-        "first, then others while they add importance or uncovered material, up to 150. Each node " +
-        "shows the passage that best introduces it.",
+        "The final list, up to 150. Defined terms, named theorems and heading topics go first, " +
+        "then whatever adds importance or coverage. Each comes with the passage that best " +
+        "introduces it.",
       render(data) {
         const s = data.stage6;
         const rows = s.nodes.map((n, i) => {
@@ -532,6 +532,7 @@
     tabsBox.replaceChildren();
     for (const stage of STAGES) {
       const button = el("button", stage.title);
+      if (stage.soon) button.append(el("span", "soon", "tab-soon"));
       button.type = "button";
       button.setAttribute("role", "tab");
       button.setAttribute("aria-selected", String(stage.id === currentStage));
@@ -549,100 +550,215 @@
     stagePanel.replaceChildren();
     if (!current) return;
     const stage = STAGES.find((s) => s.id === currentStage);
+    // Disclosure repeated inside the panel: the notice above is out of view once a reader
+    // scrolls into the results.
+    if (currentIsGenerated) {
+      stagePanel.append(
+        el("p", "Generated sample · not real course material", "generated generated-inline"),
+      );
+    }
     stagePanel.append(el("h2", stage.title), el("p", stage.explain, "explain"));
     stagePanel.append(...stage.render(current));
   }
 
   /**
-   * Show a document summary.
+   * Build the view of one document, for `show` and for a mode to keep.
    *
    * @param {object} data the JSON from the API or a precomputed file
-   * @param {boolean} isGenerated true for the bundled examples, which a model wrote
+   * @param {boolean} isGenerated true for the bundled samples, which a model wrote
    * @param {?{url: string, format: string}} original where to read the original document
+   * @returns {{data: object, isGenerated: boolean, original: ?object}}
    */
-  function show(data, isGenerated, original) {
-    // An upload's original is a local object URL; free the previous one.
-    if (currentOriginal && currentOriginal.url.startsWith("blob:")) {
-      URL.revokeObjectURL(currentOriginal.url);
-    }
-    current = data;
-    // One notice above the topic buttons, shown while a generated example is open.
-    generatedNotice.hidden = !isGenerated;
-    currentOriginal = original
-      ? {
-          url: original.url,
-          format: original.format,
-          isHebrew: data.stage2.language === "he",
-          node: null,
-        }
-      : null;
+  function makeView(data, isGenerated, original) {
+    return {
+      data,
+      isGenerated,
+      original: original
+        ? { url: original.url, format: original.format, isHebrew: data.stage2.language === "he", node: null }
+        : null,
+    };
+  }
+
+  /**
+   * Show a document's stages, or hide the results when there is no document yet.
+   *
+   * @param {?{data: object, isGenerated: boolean, original: ?object}} view
+   */
+  function show(view) {
+    current = view ? view.data : null;
+    currentIsGenerated = view ? view.isGenerated : false;
+    currentOriginal = view ? view.original : null;
+    tabsBox.hidden = !view;
+    stagePanel.hidden = !view;
     renderTabs();
     renderStage();
   }
 
   /**
-   * Load a precomputed example and mark its button.
+   * Switch between the samples and the user's own file; each keeps its last result.
+   *
+   * @param {string} next "examples" or "upload"
+   */
+  function setMode(next) {
+    mode = next;
+    modeBox
+      .querySelectorAll("button")
+      .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === next)));
+    examplesPane.hidden = next !== "examples";
+    uploadForm.hidden = next !== "upload";
+    setStatus("");
+    show(views[next]);
+  }
+
+  /**
+   * Load a precomputed sample and mark its button.
    *
    * @param {{id: string, title: string}} example
    * @param {HTMLButtonElement} button
    * @returns {Promise<void>}
    */
   async function loadExample(example, button) {
-    statusLine.textContent = "Loading…";
+    setStatus("Loading…");
     try {
       const response = await fetch(`data/${encodeURIComponent(example.id)}.json`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const original = example.original ? { url: example.original, format: example.format } : null;
-      show(await response.json(), example.generated !== false, original);
+      views.examples = makeView(await response.json(), example.generated !== false, original);
+      if (mode === "examples") show(views.examples);
       examplesBox.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
       button.setAttribute("aria-pressed", "true");
-      statusLine.textContent = "";
+      setStatus("");
     } catch (error) {
       console.error(error);
-      statusLine.textContent = "The example could not be loaded. Reload the page and try again.";
+      setStatus("This sample didn't load. Reload the page and try again.", true);
     }
+  }
+
+  /**
+   * Show a status message, styled as an error when `isError` is true.
+   *
+   * @param {string} text
+   * @param {boolean} [isError]
+   */
+  function setStatus(text, isError = false) {
+    statusLine.textContent = text;
+    statusLine.classList.toggle("error", isError);
+  }
+
+  /**
+   * Show the progress box while an upload is analyzed, with elapsed time and a hint that changes
+   * when the wait gets long (a free server sleeps when idle and takes up to a minute to wake).
+   *
+   * @param {string} fileName
+   * @returns {function(): void} stops the timer and hides the box
+   */
+  function startProgress(fileName) {
+    const title = document.getElementById("progress-title");
+    const detail = document.getElementById("progress-detail");
+    const started = Date.now();
+    title.textContent = `Analyzing ${fileName}…`;
+    const tick = () => {
+      const seconds = Math.round((Date.now() - started) / 1000);
+      const hint =
+        seconds >= WAKE_HINT_SECONDS
+          ? "Waking the free demo server. Up to a minute; keep this page open."
+          : "Reading the document and finding its concepts.";
+      detail.textContent = `${seconds} s · ${hint}`;
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    progressBox.hidden = false;
+    progressBox.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    return () => {
+      clearInterval(timer);
+      progressBox.hidden = true;
+    };
+  }
+
+  /**
+   * Return a message for a file the demo cannot take, or null when it may be sent.
+   *
+   * @param {File} file
+   * @returns {?string}
+   */
+  function uploadProblem(file) {
+    if (!/\.(pdf|docx)$/i.test(file.name)) return "PDF or DOCX only.";
+    if (file.size > MAX_UPLOAD_BYTES) return "Over 10 MB. Try a smaller file.";
+    if (file.size === 0) return "This file is empty.";
+    return null;
   }
 
   /**
    * Send the chosen file to the demo API and show the result.
    *
-   * @param {SubmitEvent} event
    * @returns {Promise<void>}
    */
-  async function analyzeUpload(event) {
-    event.preventDefault();
-    const file = document.getElementById("file").files[0];
-    if (!file) {
-      statusLine.textContent = "Choose a PDF or DOCX file first.";
+  async function analyzeUpload() {
+    const input = document.getElementById("file");
+    const file = input.files[0];
+    if (!file) return;
+    const problem = uploadProblem(file);
+    if (problem) {
+      setStatus(problem, true);
+      input.value = "";
       return;
     }
-    statusLine.textContent = "Analyzing… (a free server may need a minute to wake up)";
+    setStatus("");
+    input.disabled = true;
+    uploadButton.setAttribute("aria-disabled", "true");
+    const stopProgress = startProgress(file.name);
     try {
       const response = await fetch(`${config.apiUrl}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/octet-stream", "X-Filename": file.name },
         body: file,
+        signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) {
-        statusLine.textContent = body.detail || "The file could not be analyzed.";
+        setStatus(body.detail || "Couldn't analyze this file. Try another one.", true);
         return;
       }
-      examplesBox.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      // An upload's original is a local object URL; free the previous upload's one.
+      if (views.upload && views.upload.original) URL.revokeObjectURL(views.upload.original.url);
       // The original is shown from the file on this computer; it is not sent anywhere again.
-      show(body, false, { url: URL.createObjectURL(file), format: body.stage1.format });
-      statusLine.textContent = `Showing ${file.name}.`;
+      views.upload = makeView(body, false, {
+        url: URL.createObjectURL(file),
+        format: body.stage1.format,
+      });
+      if (mode !== "upload") return;
+      currentStage = "stage1";
+      show(views.upload);
+      setStatus(`Done: ${file.name}`);
+      tabsBox.scrollIntoView({ block: "start", behavior: "smooth" });
     } catch (error) {
       console.error(error);
-      statusLine.textContent = "The demo server could not be reached. Try again later.";
+      const timedOut = error.name === "TimeoutError";
+      setStatus(
+        timedOut
+          ? "This took too long. Try again in a minute, or with a shorter file."
+          : "Couldn't reach the demo server. Check your connection and try again.",
+        true,
+      );
+    } finally {
+      stopProgress();
+      input.disabled = false;
+      input.value = "";
+      uploadButton.removeAttribute("aria-disabled");
     }
   }
 
-  /** Load the example index, render its buttons and open the first example. */
+  /** Wire the mode switch and upload, render the sample buttons and open the first sample. */
   async function start() {
+    // Without an API there is nothing to upload to, so the switch stays a single "Samples" label.
     if (config.apiUrl) {
-      uploadForm.hidden = false;
-      uploadForm.addEventListener("submit", analyzeUpload);
+      modeBox.querySelector('[data-mode="upload"]').hidden = false;
+      modeBox
+        .querySelectorAll("button")
+        .forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
+      // Analysis starts as soon as a file is chosen; there is no separate submit step.
+      document.getElementById("file").addEventListener("change", analyzeUpload);
+      uploadForm.addEventListener("submit", (event) => event.preventDefault());
     }
     try {
       const response = await fetch("data/index.json");
@@ -658,7 +774,7 @@
       });
     } catch (error) {
       console.error(error);
-      statusLine.textContent = "The examples could not be loaded.";
+      setStatus("The samples didn't load. Reload the page and try again.", true);
     }
   }
 

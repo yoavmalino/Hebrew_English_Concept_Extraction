@@ -53,6 +53,55 @@
   box-sizing: border-box;
 }
 
+/* Elements styled with display: flex or grid must still disappear when hidden. */
+[hidden] {
+  display: none !important;
+}
+
+/* Sample documents / Your own file: a two-part segmented switch. */
+.mode {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 16px;
+  background: var(--surface);
+}
+
+.mode button {
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 14px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+}
+
+.mode button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.tab-soon {
+  font-size: 0.72rem;
+  margin-inline-start: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px dashed var(--muted);
+  color: var(--muted);
+}
+
+.soon-badge {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -150,6 +199,89 @@ button:focus-visible {
 .upload .note {
   flex-basis: 100%;
   margin: 0;
+}
+
+/* The label is the visible button; the real file input is hidden but stays keyboard-usable. */
+.upload-button {
+  display: inline-block;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.upload-button[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.upload:has(input:focus-visible) .upload-button {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Shown while an upload is being analyzed. */
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 8px;
+}
+
+.progress[hidden] {
+  display: none;
+}
+
+.progress .note {
+  margin-top: 2px;
+}
+
+.spinner {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+}
+
+.status.error {
+  color: #b3261e;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .status.error {
+    color: #f2b8b5;
+  }
 }
 
 .tabs {
@@ -355,6 +487,11 @@ td.num {
   padding: 10px 14px;
   margin: 0 0 16px;
   font-size: 0.92rem;
+}
+
+.generated-inline {
+  padding: 6px 12px;
+  margin-bottom: 12px;
 }
 
 ul.sections {
