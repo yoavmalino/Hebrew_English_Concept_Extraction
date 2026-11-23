@@ -26,6 +26,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: actions/configure-pages@v6
+      # Pages lets browsers cache files for 10 minutes, so a visitor could get the new page with
+      # the old script. Tagging each file with the commit makes every deploy load fresh copies.
+      - name: Add the commit to script and style URLs
+        run: |
+          version="${GITHUB_SHA::7}"
+          sed -i -E "s#(src|href)=\"(app\.js|config\.js|style\.css)\"#\1=\"\2?v=${version}\"#g" demo/web/index.html
+          grep -c "?v=${version}" demo/web/index.html
       - uses: actions/upload-pages-artifact@v5
         with:
           path: demo/web
