@@ -28,7 +28,9 @@ TOP_CANDIDATES = 40
 TOP_IMPORTANCE = 40
 MAX_SECTIONS = 60
 MAX_RULE_MERGES = 30
-EXCERPT_CHARS = 600
+# The whole extracted text is returned so the page can show it; the cap only keeps a huge upload
+# from producing a response the browser struggles with (a 150-page summary is ~400k characters).
+MAX_TEXT_CHARS = 500_000
 DEFINITION_CHARS = 220
 # A passage must add at least this many characters to the name to be worth showing.
 MIN_PASSAGE_EXTRA = 15
@@ -62,12 +64,13 @@ def _package_version(name: str) -> str:
 
 
 def _stage1(result) -> dict:
-    """Summarize the extraction: format, sections, units and formatting signal shares."""
+    """Summarize the extraction: the full text, sections, units and formatting signal shares."""
     info = result.structure
     return {
         "format": result.format,
         "characters": len(result.text),
-        "excerpt": result.text[:EXCERPT_CHARS],
+        "text": result.text[:MAX_TEXT_CHARS],
+        "text_truncated": len(result.text) > MAX_TEXT_CHARS,
         "sections": [{"title": s.title, "level": s.level} for s in info.sections[:MAX_SECTIONS]],
         "section_count": len(info.sections),
         "units": dict(Counter(unit.type for unit in info.units)),

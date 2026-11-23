@@ -36,6 +36,22 @@ def test_analyze_returns_every_stage_for_a_docx(client):
     assert all("name" in node and "passage" in node for node in body["stage6"]["nodes"])
 
 
+def test_analyze_returns_the_whole_extracted_text(client):
+    data = (FIXTURES / "struct_he_styles.docx").read_bytes()
+    stage1 = _post(client, data).json()["stage1"]
+    expected = analysis._EXTRACTOR.extract_bytes(data, filename="doc.docx").text
+    assert stage1["text"] == expected
+    assert stage1["text_truncated"] is False
+    assert stage1["characters"] == len(expected)
+
+
+def test_analyze_caps_a_very_long_text_and_says_so(client, monkeypatch):
+    monkeypatch.setattr(analysis, "MAX_TEXT_CHARS", 20)
+    stage1 = _post(client, (FIXTURES / "struct_he_styles.docx").read_bytes()).json()["stage1"]
+    assert len(stage1["text"]) == 20
+    assert stage1["text_truncated"] is True
+
+
 def test_analyze_rejects_a_body_over_the_limit(client, monkeypatch):
     monkeypatch.setattr("app.MAX_FILE_BYTES", 10)
     response = _post(client, b"%PDF-" + b"x" * 100, "big.pdf")

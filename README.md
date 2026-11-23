@@ -103,8 +103,12 @@ Its output format is specified in [extractor/docs/FORMAT.md](extractor/docs/FORM
 ## Demo
 
 - **`demo/web`**: a static page, deployed to GitHub Pages by `.github/workflows/pages.yml`. It
-  shows each stage for four synthetic course summaries (written by a model for testing, not real
-  course material). `demo/build_examples.py` rebuilds its data.
+  shows each stage for four generated course summaries (written by a model for testing, not real
+  course material), with the original document beside the full extracted text.
+  `demo/build_examples.py` rebuilds its data and copies the originals to `demo/web/originals/`.
+  The originals are drawn in the browser by [pdf.js](https://github.com/mozilla/pdf.js) and
+  [docx-preview](https://github.com/VolodymyrBaydalka/docxjs) (both Apache-2.0), loaded from a
+  CDN at pinned versions only when a document is shown.
 - **`demo/api`**: an optional FastAPI service with one endpoint, `POST /analyze`, that runs the
   same analysis on an uploaded file of up to 10 MB. The file is held in memory for the call
   only; nothing is stored and requests are not logged. `render.yaml` deploys it to Render's free

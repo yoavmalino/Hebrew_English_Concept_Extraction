@@ -2,21 +2,29 @@
  {
   "id": "01-algebra-a-pdf",
   "title": "Linear algebra (PDF)",
-  "format": "pdf"
+  "format": "pdf",
+  "original": "originals/01-algebra-a-pdf.pdf",
+  "generated": true
  },
  {
   "id": "03-psych-w-docx",
   "title": "Developmental psychology (DOCX)",
-  "format": "docx"
+  "format": "docx",
+  "original": "originals/03-psych-w-docx.docx",
+  "generated": true
  },
  {
   "id": "04-bio-d-pdf",
   "title": "Cell biology (PDF)",
-  "format": "pdf"
+  "format": "pdf",
+  "original": "originals/04-bio-d-pdf.pdf",
+  "generated": true
  },
  {
   "id": "08-os-d-pdf",
   "title": "Operating systems (PDF)",
-  "format": "pdf"
+  "format": "pdf",
+  "original": "originals/08-os-d-pdf.pdf",
+  "generated": true
  }
 ]
