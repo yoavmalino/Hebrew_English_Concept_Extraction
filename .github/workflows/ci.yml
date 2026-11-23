@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install
+        run: pip install -e extractor -e pipeline -r requirements-dev.txt
+      - name: Lint
+        run: ruff check .
+      - name: Format check
+        run: ruff format --check .
+      # The Tesseract test skips here (no Tesseract on the runner); the extractor's golden files
+      # are the Linux reference output, so two of them differ on macOS.
+      - name: Tests
+        run: python -m pytest -q

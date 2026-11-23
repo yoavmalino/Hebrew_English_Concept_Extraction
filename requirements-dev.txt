@@ -1,0 +1,9 @@
+# Development and CI only. Install the two packages first: pip install -e extractor -e pipeline
+pytest==9.1.1
+ruff==0.17.5
+# The committee and normalization scripts send through httpx; anthropic is imported only when
+# a script really sends (--send).
+httpx==0.28.1
+anthropic==1.17.0
+# The demo API's tests (demo/api/requirements.txt pins the same versions).
+fastapi==0.136.3

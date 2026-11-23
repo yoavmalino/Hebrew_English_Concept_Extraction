@@ -1,0 +1,12 @@
+{
+  "p0": 0.0625,
+  "t_max": 4.0,
+  "eta": 1.0,
+  "m0": 5,
+  "combine": "max",
+  "anchor": "design",
+  "variant": "A",
+  "lambda": 1.0,
+  "tau": 0.35,
+  "eps": 0.2
+}

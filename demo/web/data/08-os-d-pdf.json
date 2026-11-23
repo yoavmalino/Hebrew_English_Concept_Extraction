@@ -1,0 +1,2156 @@
+{
+ "versions": {
+  "hebmath": "1.1.0",
+  "concept_pipeline": "dev"
+ },
+ "mode": "algorithmic",
+ "stage1": {
+  "format": "pdf",
+  "characters": 18331,
+  "excerpt": "מבוא: מה עושה מערכת הפעלה\n\nמערכת הפעלה כמתווכת בין חומרה לתוכנה\n\nמערכת הפעלה (Operating System, OS) היא שכבת התוכנה הראשונה שרצה על החומרה אחרי שהמחשב נדלק, והיא זו שמאפשרת לכל שאר התוכנות לעבוד. בלעדיה, כל תוכנית הייתה צריכה לנהל לבד את הפסיקות מהמקלדת, את כתובות הזיכרון ואת הפורמט של הדיסק, וכל יישום היה נכתב מחדש עבור כל דגם של מעבד. מערכת ההפעלה נותנת הפשטה אחידה: התוכנית רואה קובץ, תהליך או חלון זיכרון, ולא את הבקרים והחוטים שמתחת לזה. ההפשטה הזאת היא מה שמאפשר לאותה מערכת לרוץ על מחשבים שונים בלי לשכתב את היישומים.\n\nהגדרה:\n\nמערכת הפעלה היא התוכנה שמנהלת את משאבי המחשב, כלומר המעבד (CPU(,",
+  "sections": [
+   {
+    "title": "מבוא: מה עושה מערכת הפעלה",
+    "level": 1
+   },
+   {
+    "title": "מערכת הפעלה כמתווכת בין חומרה לתוכנה",
+    "level": 2
+   },
+   {
+    "title": "מנהל משאבים ומכונה מורחבת",
+    "level": 2
+   },
+   {
+    "title": "מנהל משאבים",
+    "level": 3
+   },
+   {
+    "title": "מכונה מורחבת",
+    "level": 3
+   },
+   {
+    "title": "מטרות התכנון של מערכת הפעלה",
+    "level": 2
+   },
+   {
+    "title": "מבנה הליבה: kernel ומצב משתמש",
+    "level": 2
+   },
+   {
+    "title": "kernel mode לעומת user mode",
+    "level": 3
+   },
+   {
+    "title": "מעבר בין המצבים דרך system call",
+    "level": 3
+   },
+   {
+    "title": "תהליכים ושרשורים",
+    "level": 1
+   },
+   {
+    "title": "מהו תהליך",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: תהליך",
+    "level": 3
+   },
+   {
+    "title": "מצבי תהליך והחלפת הקשר",
+    "level": 2
+   },
+   {
+    "title": "המעברים הבסיסיים",
+    "level": 3
+   },
+   {
+    "title": "החלפת הקשר (context switch)",
+    "level": 3
+   },
+   {
+    "title": "שרשורים לעומת תהליכים",
+    "level": 2
+   },
+   {
+    "title": "תזמון מעבד",
+    "level": 1
+   },
+   {
+    "title": "מטרות התזמון",
+    "level": 2
+   },
+   {
+    "title": "אלגוריתמים בסיסיים",
+    "level": 2
+   },
+   {
+    "title": "SJFו FCFS",
+    "level": 3
+   },
+   {
+    "title": "Round Robin",
+    "level": 3
+   },
+   {
+    "title": "תזמון מודע לעדיפויות",
+    "level": 2
+   },
+   {
+    "title": "הרעבה וaging",
+    "level": 3
+   },
+   {
+    "title": "Multilevel queues",
+    "level": 3
+   },
+   {
+    "title": "סנכרון ומוטקסים",
+    "level": 1
+   },
+   {
+    "title": "גישה לזיכרון משותף ותחרות",
+    "level": 2
+   },
+   {
+    "title": "race condition בפועל",
+    "level": 3
+   },
+   {
+    "title": "הקטע הקריטי",
+    "level": 3
+   },
+   {
+    "title": "מנעולים וmutex",
+    "level": 2
+   },
+   {
+    "title": "סמפורים ודפוס יצרןצרכן",
+    "level": 2
+   },
+   {
+    "title": "סמפור בינארי וסופר",
+    "level": 3
+   },
+   {
+    "title": "דפוס producerconsumer",
+    "level": 3
+   },
+   {
+    "title": "מבוי סתום",
+    "level": 1
+   },
+   {
+    "title": "מה מתרחש במבוי סתום",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: מבוי סתום",
+    "level": 3
+   },
+   {
+    "title": "תנאי קופמן",
+    "level": 3
+   },
+   {
+    "title": "גרף הקצאת משאבים",
+    "level": 3
+   },
+   {
+    "title": "מניעה וזיהוי",
+    "level": 2
+   },
+   {
+    "title": "הימנעות: אלגוריתם הבנקאי",
+    "level": 2
+   },
+   {
+    "title": "מצב בטוח",
+    "level": 3
+   },
+   {
+    "title": "בדיקת בקשה",
+    "level": 3
+   },
+   {
+    "title": "זיכרון וירטואלי",
+    "level": 1
+   },
+   {
+    "title": "כתובות לוגיות ופיזיות",
+    "level": 2
+   },
+   {
+    "title": "דפדוף (paging)",
+    "level": 2
+   },
+   {
+    "title": "טבלת דפים וTLB",
+    "level": 3
+   },
+   {
+    "title": "תקלת דפים",
+    "level": 3
+   },
+   {
+    "title": "החלפת דפים והטרשינג",
+    "level": 2
+   },
+   {
+    "title": "מערכות קבצים וקלטפלט",
+    "level": 1
+   },
+   {
+    "title": "מערכת הקבצים ותיאור הקובץ",
+    "level": 2
+   },
+   {
+    "title": "מצביעים ישירים ועקיפים",
+    "level": 3
+   },
+   {
+    "title": "הקצאת בלוקים",
+    "level": 3
+   },
+   {
+    "title": "התקני קלטפלט וחציצה",
+    "level": 2
+   },
+   {
+    "title": "תזמון גישות לדיסק",
+    "level": 2
+   },
+   {
+    "title": "טיפים לבחינה",
+    "level": 2
+   }
+  ],
+  "section_count": 54,
+  "units": {
+   "paragraph": 57,
+   "definition": 3,
+   "example": 2,
+   "remark": 1
+  },
+  "signal_share": {
+   "bold": 0.036,
+   "underline": 0.006,
+   "size": 0.006,
+   "line": 0.05
+  },
+  "warnings": []
+ },
+ "stage2": {
+  "candidates": 558,
+  "words": 3082,
+  "language": "he",
+  "top": [
+   {
+    "name": "תהליך",
+    "count": 75,
+    "sources": [
+     "definition",
+     "heading",
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "מערכת",
+    "count": 32,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "זמן",
+    "count": 31,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "המעבד",
+    "count": 24,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מצב",
+    "count": 23,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "התהליכים",
+    "count": 22,
+    "sources": [
+     "heading",
+     "ngram",
+     "label"
+    ]
+   },
+   {
+    "name": "תוכנית",
+    "count": 19,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "אלגוריתם",
+    "count": 18,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "משאב",
+    "count": 18,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "ההפעלה",
+    "count": 15,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מערכת ההפעלה",
+    "count": 15,
+    "sources": [
+     "definition",
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "משאבים",
+    "count": 15,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "הזיכרון",
+    "count": 13,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מבוי",
+    "count": 13,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מבוי סתום",
+    "count": 13,
+    "sources": [
+     "definition",
+     "heading",
+     "emphasis",
+     "ngram",
+     "gloss",
+     "label"
+    ]
+   },
+   {
+    "name": "סתום",
+    "count": 13,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "גישה",
+    "count": 12,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "הדיסק",
+    "count": 12,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "הדפים",
+    "count": 12,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מערכות",
+    "count": 12,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "הדף",
+    "count": 11,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "כתובות",
+    "count": 11,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מספר",
+    "count": 11,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "קובץ",
+    "count": 11,
+    "sources": [
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "בקשה",
+    "count": 10,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "שרשורים",
+    "count": 10,
+    "sources": [
+     "heading",
+     "ngram",
+     "label"
+    ]
+   },
+   {
+    "name": "והמתנה",
+    "count": 9,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "סדר",
+    "count": 9,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "התור",
+    "count": 9,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "הקצאה",
+    "count": 8,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "החומרה",
+    "count": 8,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מונה",
+    "count": 8,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "המעבר",
+    "count": 8,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מתאים",
+    "count": 8,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "תזמון",
+    "count": 8,
+    "sources": [
+     "emphasis",
+     "ngram",
+     "gloss"
+    ]
+   },
+   {
+    "name": "ואילו",
+    "count": 7,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "אלגוריתמים",
+    "count": 7,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "דרך",
+    "count": 7,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "יכול",
+    "count": 7,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "לזיכרון",
+    "count": 7,
+    "sources": [
+     "ngram"
+    ]
+   }
+  ]
+ },
+ "stage4": {
+  "pairs": 35,
+  "pairs_by_finder": {
+   "gloss": 19,
+   "spelling": 10,
+   "typo": 6
+  },
+  "merged_by_rule": [],
+  "merged_by_rule_count": 0,
+  "left_apart": 35,
+  "fragments_absorbed": 44,
+  "concepts": 514
+ },
+ "stage5": {
+  "t_signal": "off",
+  "weights": {
+   "Q": 0.2049,
+   "R": 0.0,
+   "T": 0.2108,
+   "M": 0.122,
+   "L": 0.084,
+   "V_b": 0.1431,
+   "V_u": 0.1452,
+   "V_s": 0.09
+  },
+  "top": [
+   {
+    "name": "race condition",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.25,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "מבוי סתום",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.875,
+     "R": 0.537,
+     "M": 0.0,
+     "V_b": 0.875,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "מערכת הפעלה",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.676,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "קבצים",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.334,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "תהליך",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.918,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "תזמון",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.47,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.938
+    }
+   },
+   {
+    "name": "מערכת",
+    "importance": 0.994,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.859,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.938
+    }
+   },
+   {
+    "name": "וירטואלי",
+    "importance": 0.992,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.294,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "זיכרון",
+    "importance": 0.992,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.694,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "זיכרון וירטואלי",
+    "importance": 0.992,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "תנאי קופמן",
+    "importance": 0.991,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.285,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "שרשורים",
+    "importance": 0.99,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.405,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "תהליכים",
+    "importance": 0.99,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.798,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "מערכות",
+    "importance": 0.989,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.636,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "מערכות קבצים וקלטפלט",
+    "importance": 0.989,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "מעבד",
+    "importance": 0.987,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.851,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "תזמון מעבד",
+    "importance": 0.987,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "סנכרון",
+    "importance": 0.987,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.294,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "סנכרון ומוטקסים",
+    "importance": 0.987,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "מה עושה מערכת הפעלה",
+    "importance": 0.982,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "עושה",
+    "importance": 0.982,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.191,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "עושה מערכת הפעלה",
+    "importance": 0.982,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "תהליכים ושרשורים",
+    "importance": 0.979,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.5,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "דפים",
+    "importance": 0.976,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.435,
+     "M": 0.0,
+     "V_b": 0.875,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "context switch",
+    "importance": 0.973,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.25,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "mode",
+    "importance": 0.97,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.191,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "תקלת דפים",
+    "importance": 0.968,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.221,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "fcfs",
+    "importance": 0.966,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.259,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "multilevel queues",
+    "importance": 0.966,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.221,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "round robin",
+    "importance": 0.966,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.221,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "הקטע הקריטי",
+    "importance": 0.965,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.221,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "הקריטי",
+    "importance": 0.965,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.191,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "סמפור",
+    "importance": 0.965,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.259,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "מנהל משאבים ומכונה מורחבת",
+    "importance": 0.964,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.0,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "החלפת",
+    "importance": 0.962,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.294,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "החלפת הקשר",
+    "importance": 0.962,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "בלוקים",
+    "importance": 0.953,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.268,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "הקצאת",
+    "importance": 0.953,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.371,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "הקצאת בלוקים",
+    "importance": 0.953,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.191,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "חציצה",
+    "importance": 0.953,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.221,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   }
+  ]
+ },
+ "stage6": {
+  "pool": 364,
+  "report": {
+   "anchored": 81,
+   "anchored_over_cap": 0,
+   "hidden": 0
+  },
+  "nodes": [
+   {
+    "name": "race condition",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "זה מצב שנקרא race condition."
+   },
+   {
+    "name": "מבוי סתום",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "מבוי סתום הוא מצב שבו קבוצה של תהליכים נמצאת בהמתנה מעגלית, כשכל תהליך בקבוצה ממתין למשאב שמוחזק על ידי תהליך אחר בקבוצה."
+   },
+   {
+    "name": "מערכת הפעלה",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "מערכת הפעלה היא התוכנה שמנהלת את משאבי המחשב, כלומר המעבד (CPU(, הזיכרון הראשי )RAM), התקני הקלטפלט והדיסק, ומספקת לתוכניות ממשק מסודר לשימוש בהם."
+   },
+   {
+    "name": "תהליך",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "תהליך הוא ישות שמערכת ההפעלה מנהלת, ובעבורה נשמר בלוק מידע בליבה שנקרא בלוק בקרה של תהליך"
+   },
+   {
+    "name": "זיכרון וירטואלי",
+    "importance": 0.992,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "זיכרון וירטואלי"
+   },
+   {
+    "name": "תנאי קופמן",
+    "importance": 0.991,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "התנאים הללו נקראים תנאי קופמן, והם הבסיס לכל שיטות המניעה."
+   },
+   {
+    "name": "שרשורים",
+    "importance": 0.99,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "כמה שרשורים באותו תהליך חולקים את אותו מרחב כתובות, את אותם קבצים פתוחים ואת אותה הערימה, אבל לכל אחד יש מחסנית ורגיסטרים משלו."
+   },
+   {
+    "name": "תהליכים",
+    "importance": 0.99,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "מחיר הבידוד הוא עלות כבדה ביצירה ובמעבר בין תהליכים, כפי שנראה בהמשך."
+   },
+   {
+    "name": "מערכות קבצים וקלטפלט",
+    "importance": 0.989,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מערכות קבצים וקלטפלט"
+   },
+   {
+    "name": "תזמון מעבד",
+    "importance": 0.987,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "תזמון מעבד"
+   },
+   {
+    "name": "סנכרון ומוטקסים",
+    "importance": 0.987,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "סנכרון ומוטקסים"
+   },
+   {
+    "name": "מה עושה מערכת הפעלה",
+    "importance": 0.982,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מה עושה מערכת הפעלה"
+   },
+   {
+    "name": "עושה מערכת הפעלה",
+    "importance": 0.982,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מה עושה מערכת הפעלה"
+   },
+   {
+    "name": "תהליכים ושרשורים",
+    "importance": 0.979,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "תהליכים ושרשורים"
+   },
+   {
+    "name": "context switch",
+    "importance": 0.973,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הפעולה הזאת נקראת context switch, והיא תקורה טהורה:"
+   },
+   {
+    "name": "תקלת דפים",
+    "importance": 0.968,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "תקלת דפים (page fault) מתרחשת כשתהליך ניגש לדף שאינו נמצא כרגע בזיכרון הפיזי."
+   },
+   {
+    "name": "fcfs",
+    "importance": 0.966,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "FCFS (First Come First Served) מריץ את התהליכים לפי סדר ההגעה, ללא הפקעה."
+   },
+   {
+    "name": "multilevel queues",
+    "importance": 0.966,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "Multilevel queues מחלקים את התורים לכמה רמות לפי סוג התהליך, למשל תורים נפרדים לתהליכים אינטראקטיביים"
+   },
+   {
+    "name": "round robin",
+    "importance": 0.966,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "Round Robin נותן לכל תהליך פרק זמן קבוע שנקרא quantum, ואם התהליך לא סיים בפרק הזמן, הוא מוחזר לסוף התור."
+   },
+   {
+    "name": "הקטע הקריטי",
+    "importance": 0.965,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "הקטע הקריטי (critical section( הוא החלק בקוד שבו תהליך ניגש למשאב משותף."
+   },
+   {
+    "name": "מנהל משאבים ומכונה מורחבת",
+    "importance": 0.964,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "מנהל משאבים ומכונה מורחבת"
+   },
+   {
+    "name": "החלפת הקשר",
+    "importance": 0.962,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "החלפת הקשר (context switch)"
+   },
+   {
+    "name": "הקצאת בלוקים",
+    "importance": 0.953,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "יש שלוש שיטות בסיסיות להקצאת בלוקים לקובץ."
+   },
+   {
+    "name": "מצביעים ישירים ועקיפים",
+    "importance": 0.953,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מצביעים ישירים ועקיפים"
+   },
+   {
+    "name": "דפדוף",
+    "importance": 0.952,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "דפדוף (paging( מחלק את הזיכרון הפיזי למסגרות (frames( בגודל קבוע, ואת מרחב הכתובות הלוגי לדפים באותו גודל."
+   },
+   {
+    "name": "טבלת דפים",
+    "importance": 0.952,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "במצב kernel המעבד יכול להריץ כל פקודה, כולל פקודות שמשנות את טבלת הדפים או מכבות פסיקות."
+   },
+   {
+    "name": "המעברים הבסיסיים",
+    "importance": 0.949,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "המעברים הבסיסיים"
+   },
+   {
+    "name": "דפוס",
+    "importance": 0.948,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "דפוס producerconsumer"
+   },
+   {
+    "name": "sjf",
+    "importance": 0.944,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "SJF (Shortest Job First) בוחר את התהליך הקצר ביותר, ומוכח שהוא נותן את זמן ההמתנה הממוצע הקטן ביותר בין אלגוריתמים לאמפקיעים."
+   },
+   {
+    "name": "הרעבה",
+    "importance": 0.944,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הוא פשוט ומוגן מהרעבה, אבל סובל מתופעה שנקראת convoy effect:"
+   },
+   {
+    "name": "kernel",
+    "importance": 0.943,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "kernel mode לעומת user mode"
+   },
+   {
+    "name": "מכונה מורחבת",
+    "importance": 0.943,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הפרספקטיבה השנייה רואה במערכת ההפעלה מכונה מורחבת:"
+   },
+   {
+    "name": "מנהל משאבים",
+    "importance": 0.943,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הפרספקטיבה הראשונה רואה במערכת ההפעלה מנהל משאבים, כלומר מי שקובע מי מקבל את המעבד עכשיו, איזה חלק מהזיכרון שייך לאיזה תהליך, ומי ניגש לדיסק בשלב הבא."
+   },
+   {
+    "name": "בלוק בקרה",
+    "importance": 0.938,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "תהליך הוא ישות שמערכת ההפעלה מנהלת, ובעבורה נשמר בלוק מידע בליבה שנקרא בלוק בקרה של תהליך"
+   },
+   {
+    "name": "אנומליית בלדי",
+    "importance": 0.936,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "FIFO מציג תופעה מעניינת שנקראת אנומליית בלדי:"
+   },
+   {
+    "name": "אלגוריתם הבנקאי",
+    "importance": 0.932,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "אלגוריתם הבנקאי (Banker’s algorithm) של דייקסטרה בודק לכל בקשה אם אחרי ההקצאה המערכת נשארת במצב בטוח."
+   },
+   {
+    "name": "בדיקת בקשה",
+    "importance": 0.932,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "בדיקת בקשה"
+   },
+   {
+    "name": "גרף הקצאת משאבים",
+    "importance": 0.932,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "כדי לזהות מבוי סתום אפשר לצייר גרף הקצאת משאבים, שבו תהליכים הם צמתים עגולים, משאבים הם צמתים מרובעים, קשת מהמשאב לתהליך מסמנת הקצאה, וקשת מהתהליך למשאב מסמנת בקשה."
+   },
+   {
+    "name": "מצב בטוח",
+    "importance": 0.932,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "אלגוריתם הבנקאי (Banker’s algorithm) של דייקסטרה בודק לכל בקשה אם אחרי ההקצאה המערכת נשארת במצב בטוח."
+   },
+   {
+    "name": "convoy effect",
+    "importance": 0.932,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הוא פשוט ומוגן מהרעבה, אבל סובל מתופעה שנקראת convoy effect:"
+   },
+   {
+    "name": "לעומת",
+    "importance": 0.919,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "kernel mode לעומת user mode"
+   },
+   {
+    "name": "מהו תהליך",
+    "importance": 0.914,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מהו תהליך"
+   },
+   {
+    "name": "מצבי תהליך והחלפת הקשר",
+    "importance": 0.914,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מצבי תהליך והחלפת הקשר"
+   },
+   {
+    "name": "שרשורים לעומת תהליכים",
+    "importance": 0.914,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "שרשורים לעומת תהליכים"
+   },
+   {
+    "name": "mutex",
+    "importance": 0.913,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "Mutex (קיצור של mutual exclusion) הוא מנעול בינארי:"
+   },
+   {
+    "name": "race condition בפועל",
+    "importance": 0.913,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "race condition בפועל"
+   },
+   {
+    "name": "בפועל",
+    "importance": 0.913,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "בנוסף, החלפה מבטלת חלק מהנתונים שנמצאים במטמון (cache) של המעבד, ולכן העלות בפועל גבוהה מזו שנשמרת בPCB."
+   },
+   {
+    "name": "דפוס producerconsumer",
+    "importance": 0.913,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "דפוס producerconsumer"
+   },
+   {
+    "name": "סמפור בינארי וסופר",
+    "importance": 0.913,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "סמפור בינארי וסופר"
+   },
+   {
+    "name": "aging",
+    "importance": 0.897,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הפתרון הנפוץ נקרא aging, שבו העדיפות של תהליך ממתין עולה בהדרגה עם הזמן."
+   },
+   {
+    "name": "אלגוריתמים בסיסיים",
+    "importance": 0.897,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "אלגוריתמים בסיסיים"
+   },
+   {
+    "name": "מטרות התזמון",
+    "importance": 0.897,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מטרות התזמון"
+   },
+   {
+    "name": "תזמון מודע לעדיפויות",
+    "importance": 0.897,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "תזמון מודע לעדיפויות"
+   },
+   {
+    "name": "paging",
+    "importance": 0.892,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "דפדוף (paging( מחלק את הזיכרון הפיזי למסגרות (frames( בגודל קבוע, ואת מרחב הכתובות הלוגי לדפים באותו גודל."
+   },
+   {
+    "name": "tlb",
+    "importance": 0.892,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "כדי למנוע זאת, המעבד מחזיק מטמון קטן של תרגומים שנקרא TLB (Translation Lookaside Buffer)."
+   },
+   {
+    "name": "החלפת דפים והטרשינג",
+    "importance": 0.892,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "החלפת דפים והטרשינג"
+   },
+   {
+    "name": "כתובות לוגיות ופיזיות",
+    "importance": 0.892,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "כתובות לוגיות ופיזיות"
+   },
+   {
+    "name": "kernel mode",
+    "importance": 0.89,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "kernel mode לעומת user mode"
+   },
+   {
+    "name": "kernel mode לעומת user mode",
+    "importance": 0.89,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "kernel mode לעומת user mode"
+   },
+   {
+    "name": "system call",
+    "importance": 0.89,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מעבר בין המצבים דרך system call"
+   },
+   {
+    "name": "user mode",
+    "importance": 0.89,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "kernel mode לעומת user mode"
+   },
+   {
+    "name": "מעבר בין המצבים",
+    "importance": 0.89,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מעבר בין המצבים דרך system call"
+   },
+   {
+    "name": "מעבר בין המצבים דרך system call",
+    "importance": 0.89,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מעבר בין המצבים דרך system call"
+   },
+   {
+    "name": "mutual exclusion",
+    "importance": 0.878,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הפתרון הכללי הוא לתת לכל היותר תהליך אחד בקטע הקריטי בכל רגע, וזה נקרא mutual exclusion."
+   },
+   {
+    "name": "התקני קלטפלט וחציצה",
+    "importance": 0.87,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "התקני קלטפלט וחציצה"
+   },
+   {
+    "name": "טיפים לבחינה",
+    "importance": 0.87,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "טיפים לבחינה"
+   },
+   {
+    "name": "מערכת הקבצים ותיאור הקובץ",
+    "importance": 0.87,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מערכת הקבצים ותיאור הקובץ"
+   },
+   {
+    "name": "תזמון גישות לדיסק",
+    "importance": 0.87,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "תזמון גישות לדיסק"
+   },
+   {
+    "name": "קריאת מערכת",
+    "importance": 0.851,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "היא מבקשת מהמערכת לבצע את הפעולה דרך קריאת מערכת (system call) כמו read וwrite."
+   },
+   {
+    "name": "הימנעות",
+    "importance": 0.845,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הימנעות )avoidance) בודקת כל בקשה לפני אישורה."
+   },
+   {
+    "name": "מה מתרחש במבוי סתום",
+    "importance": 0.845,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מה מתרחש במבוי סתום"
+   },
+   {
+    "name": "מניעה וזיהוי",
+    "importance": 0.845,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מניעה וזיהוי"
+   },
+   {
+    "name": "מתרחש במבוי סתום",
+    "importance": 0.845,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מה מתרחש במבוי סתום"
+   },
+   {
+    "name": "גישה לזיכרון משותף ותחרות",
+    "importance": 0.839,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "גישה לזיכרון משותף ותחרות"
+   },
+   {
+    "name": "מנעולים",
+    "importance": 0.839,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מנעולים וmutex"
+   },
+   {
+    "name": "סמפורים ודפוס יצרןצרכן",
+    "importance": 0.839,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "סמפורים ודפוס יצרןצרכן"
+   },
+   {
+    "name": "kernel ומצב משתמש",
+    "importance": 0.812,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "kernel ומצב משתמש"
+   },
+   {
+    "name": "מבנה הליבה",
+    "importance": 0.812,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מבנה הליבה:"
+   },
+   {
+    "name": "מטרות התכנון של מערכת הפעלה",
+    "importance": 0.812,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מטרות התכנון של מערכת הפעלה"
+   },
+   {
+    "name": "מערכת הפעלה כמתווכת בין חומרה לתוכנה",
+    "importance": 0.812,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "מערכת הפעלה כמתווכת בין חומרה לתוכנה"
+   },
+   {
+    "name": "במצב משתמש",
+    "importance": 0.812,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "כל השאר, כולל הדפדפן, עורך הטקסט והshell, רץ במצב משתמש (user mode) עם הרשאות מוגבלות."
+   },
+   {
+    "name": "קבצים",
+    "importance": 1.0,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הPCB מכיל את מזהה התהליך )PID), את ערכי הרגיסטרים שנשמרו, את טבלת הקבצים הפתוחים ואת מידע על הזיכרון של התהליך."
+   },
+   {
+    "name": "תזמון",
+    "importance": 1.0,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "תזמון (scheduling) הוא ההחלטה איזה תהליך ירוץ עכשיו על המעבד."
+   },
+   {
+    "name": "מערכת",
+    "importance": 0.994,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מערכת הפעלה כמתווכת בין חומרה לתוכנה"
+   },
+   {
+    "name": "וירטואלי",
+    "importance": 0.992,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כל תהליך רץ במרחב כתובות וירטואלי משלו, וזו הסיבה שתהליך אחד לא יכול לקרוא את הזיכרון של תהליך אחר בלי מנגנון מיוחד לשיתוף."
+   },
+   {
+    "name": "זיכרון",
+    "importance": 0.992,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "בלעדיה, כל תוכנית הייתה צריכה לנהל לבד את הפסיקות מהמקלדת, את כתובות הזיכרון ואת הפורמט של הדיסק, וכל יישום היה נכתב מחדש עבור כל דגם של מעבד."
+   },
+   {
+    "name": "מערכות",
+    "importance": 0.989,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הבעיה שלו היא שאורך הריצה הבא לא ידוע מראש, ולכן מערכות מעריכות אותו מההיסטוריה של התהליך."
+   },
+   {
+    "name": "מעבד",
+    "importance": 0.987,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "בלעדיה, כל תוכנית הייתה צריכה לנהל לבד את הפסיקות מהמקלדת, את כתובות הזיכרון ואת הפורמט של הדיסק, וכל יישום היה נכתב מחדש עבור כל דגם של מעבד."
+   },
+   {
+    "name": "סנכרון",
+    "importance": 0.987,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "לכן הנושא של סנכרון, שנכסה בהמשך, נובע ישירות מהיתרון של השרשורים."
+   },
+   {
+    "name": "עושה",
+    "importance": 0.982,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "המעבר כרוך בעלות קטנה, ולכן תוכנית שמבצעת מיליון קריאות קטנות תאט בבירור בהשוואה לאחת שעושה קריאה גדולה אחת."
+   },
+   {
+    "name": "דפים",
+    "importance": 0.976,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "במצב kernel המעבד יכול להריץ כל פקודה, כולל פקודות שמשנות את טבלת הדפים או מכבות פסיקות."
+   },
+   {
+    "name": "mode",
+    "importance": 0.97,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כל השאר, כולל הדפדפן, עורך הטקסט והshell, רץ במצב משתמש (user mode) עם הרשאות מוגבלות."
+   },
+   {
+    "name": "הקריטי",
+    "importance": 0.965,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הקטע הקריטי (critical section( הוא החלק בקוד שבו תהליך ניגש למשאב משותף."
+   },
+   {
+    "name": "סמפור",
+    "importance": 0.965,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "סמפור (semaphore) הוא משתנה מונה שמתוחזק על ידי מערכת ההפעלה, עם שתי פעולות:"
+   },
+   {
+    "name": "החלפת",
+    "importance": 0.962,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מצבי תהליך והחלפת הקשר"
+   },
+   {
+    "name": "בלוקים",
+    "importance": 0.953,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הinode לא מכיל את שם הקובץ, אלא מצביעים לבלוקים שבהם נשמר התוכן, ושם הקובץ נשמר בתיקייה שמצביעה על הinode."
+   },
+   {
+    "name": "הקצאת",
+    "importance": 0.953,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כדי לזהות מבוי סתום אפשר לצייר גרף הקצאת משאבים, שבו תהליכים הם צמתים עגולים, משאבים הם צמתים מרובעים, קשת מהמשאב לתהליך מסמנת הקצאה, וקשת מהתהליך למשאב מסמנת בקשה."
+   },
+   {
+    "name": "חציצה",
+    "importance": 0.953,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "חציצה (buffering) היא שמירת נתונים באזור ביניים בזיכרון לפני שליחתם להתקן או מהתקן לתוכנית."
+   },
+   {
+    "name": "מצביעים",
+    "importance": 0.953,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הinode לא מכיל את שם הקובץ, אלא מצביעים לבלוקים שבהם נשמר התוכן, ושם הקובץ נשמר בתיקייה שמצביעה על הinode."
+   },
+   {
+    "name": "מצביעים ישירים",
+    "importance": 0.953,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הinode מכיל מערך קטן של מצביעים ישירים לבלוקים."
+   },
+   {
+    "name": "קובץ",
+    "importance": 0.953,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "קובץ הוא אוסף של נתונים בעל שם, והמערכת שומרת לכל קובץ מטאדאטה, כמו גודל, בעלים, הרשאות ומיקום בדיסק."
+   },
+   {
+    "name": "טבלת",
+    "importance": 0.952,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "במצב kernel המעבד יכול להריץ כל פקודה, כולל פקודות שמשנות את טבלת הדפים או מכבות פסיקות."
+   },
+   {
+    "name": "משאבים",
+    "importance": 0.951,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מנהל משאבים ומכונה מורחבת"
+   },
+   {
+    "name": "בסיסיים",
+    "importance": 0.949,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "המעברים הבסיסיים"
+   },
+   {
+    "name": "מכונה",
+    "importance": 0.943,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מנהל משאבים ומכונה מורחבת"
+   },
+   {
+    "name": "מנהל",
+    "importance": 0.943,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מנהל משאבים ומכונה מורחבת"
+   },
+   {
+    "name": "אלגוריתם",
+    "importance": 0.932,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "אלגוריתם שמבטיח הוגנות מושלמת עלול לבזבז זמן בהחלפות תכופות, ואלגוריתם שממקסם ניצול עלול להרעיב תהליך אחד."
+   },
+   {
+    "name": "בטוח",
+    "importance": 0.932,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "אלגוריתם הבנקאי (Banker’s algorithm) של דייקסטרה בודק לכל בקשה אם אחרי ההקצאה המערכת נשארת במצב בטוח."
+   },
+   {
+    "name": "בקשה",
+    "importance": 0.932,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "המערכת בודקת הרשאות, מתזמנת את הבקשה, ומחזירה לתוכנית קוד הצלחה או שגיאה."
+   },
+   {
+    "name": "גרף",
+    "importance": 0.932,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כדי לזהות מבוי סתום אפשר לצייר גרף הקצאת משאבים, שבו תהליכים הם צמתים עגולים, משאבים הם צמתים מרובעים, קשת מהמשאב לתהליך מסמנת הקצאה, וקשת מהתהליך למשאב מסמנת בקשה."
+   },
+   {
+    "name": "מצב",
+    "importance": 0.932,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כל השאר, כולל הדפדפן, עורך הטקסט והshell, רץ במצב משתמש (user mode) עם הרשאות מוגבלות."
+   },
+   {
+    "name": "תנאי",
+    "importance": 0.932,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "התנאים הללו נקראים תנאי קופמן, והם הבסיס לכל שיטות המניעה."
+   },
+   {
+    "name": "שרשור",
+    "importance": 0.932,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "שרשור (thread) הוא יחידת ביצוע בתוך תהליך."
+   },
+   {
+    "name": "scan",
+    "importance": 0.917,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "SCAN, המכונה גם אלגוריתם המעלית, מזיז את הראש מקצה לקצה של הדיסק ומשרת בקשות בדרכו."
+   },
+   {
+    "name": "sstf",
+    "importance": 0.917,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "SSTF Shortest Seek Time First() בוחר תמיד את הבקשה הקרובה ביותר לראש הנוכחי."
+   },
+   {
+    "name": "בינארי",
+    "importance": 0.913,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "Mutex (קיצור של mutual exclusion) הוא מנעול בינארי:"
+   },
+   {
+    "name": "סמפור בינארי",
+    "importance": 0.913,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "סמפור בינארי שערכו 0 או 1 פועל כמו mutex, ואילו סמפור מונה מתאים לניהול מספר משאבים זהים, למשל שמונה מקומות פנויים בחניון."
+   },
+   {
+    "name": "קלטפלט",
+    "importance": 0.906,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מערכת הפעלה היא התוכנה שמנהלת את משאבי המחשב, כלומר המעבד (CPU(, הזיכרון הראשי )RAM), התקני הקלטפלט והדיסק, ומספקת לתוכניות ממשק מסודר לשימוש בהם."
+   },
+   {
+    "name": "אלגוריתמים",
+    "importance": 0.897,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כמעט כל האלגוריתמים בקורס הם פשרות בין המטרות האלה."
+   },
+   {
+    "name": "מטרות",
+    "importance": 0.897,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מטרות התכנון של מערכת הפעלה"
+   },
+   {
+    "name": "החלפת דפים",
+    "importance": 0.892,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "תופעה חמורה יותר היא טרשינג (thrashing), שבה התהליכים מבלים את רוב זמנם בהחלפת דפים ומתקדמים מעט מאוד."
+   },
+   {
+    "name": "טרשינג",
+    "importance": 0.892,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "תופעה חמורה יותר היא טרשינג (thrashing), שבה התהליכים מבלים את רוב זמנם בהחלפת דפים ומתקדמים מעט מאוד."
+   },
+   {
+    "name": "כתובות",
+    "importance": 0.892,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "בלעדיה, כל תוכנית הייתה צריכה לנהל לבד את הפסיקות מהמקלדת, את כתובות הזיכרון ואת הפורמט של הדיסק, וכל יישום היה נכתב מחדש עבור כל דגם של מעבד."
+   },
+   {
+    "name": "כתובות לוגיות",
+    "importance": 0.892,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כל תהליך מתייחס לכתובות לוגיות"
+   },
+   {
+    "name": "פיזיות",
+    "importance": 0.892,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "במקום לנהל את כתובות הזיכרון הפיזיות, הוא עובד עם מרחב כתובות פרטי ונקי."
+   },
+   {
+    "name": "system",
+    "importance": 0.89,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מערכת הפעלה (Operating System, OS) היא שכבת התוכנה הראשונה שרצה על החומרה אחרי שהמחשב נדלק, והיא זו שמאפשרת לכל שאר התוכנות לעבוד."
+   },
+   {
+    "name": "user",
+    "importance": 0.89,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כל השאר, כולל הדפדפן, עורך הטקסט והshell, רץ במצב משתמש (user mode) עם הרשאות מוגבלות."
+   },
+   {
+    "name": "דרך",
+    "importance": 0.89,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "ההגדרה הזאת תחזור לאורך כל הסיכום, כי כל נושא בקורס הוא דרך אחרת לשאול איך המערכת מחלקת משאב מוגבל בין הרבה מבקשים."
+   },
+   {
+    "name": "מעבר",
+    "importance": 0.89,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מעבר בין המצבים דרך system call"
+   },
+   {
+    "name": "מצבים",
+    "importance": 0.89,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מעבר בין המצבים דרך system call"
+   },
+   {
+    "name": "גישות",
+    "importance": 0.87,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כל גישה לזיכרון דורשת כעת שתי גישות:"
+   },
+   {
+    "name": "התקני קלטפלט",
+    "importance": 0.87,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מערכת הפעלה היא התוכנה שמנהלת את משאבי המחשב, כלומר המעבד (CPU(, הזיכרון הראשי )RAM), התקני הקלטפלט והדיסק, ומספקת לתוכניות ממשק מסודר לשימוש בהם."
+   },
+   {
+    "name": "לדיסק",
+    "importance": 0.87,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הפרספקטיבה הראשונה רואה במערכת ההפעלה מנהל משאבים, כלומר מי שקובע מי מקבל את המעבד עכשיו, איזה חלק מהזיכרון שייך לאיזה תהליך, ומי ניגש לדיסק בשלב הבא."
+   },
+   {
+    "name": "לוגריתם",
+    "importance": 0.848,
+    "anchored": false,
+    "kind": "formula",
+    "passage": "$(\\log ical($"
+   },
+   {
+    "name": "זיהוי",
+    "importance": 0.845,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "זיהוי ותיקון (detection and recovery) נותן למערכת לאפשר מבוי סתום, לזהות אותו בזמן ריצה, ולשבור אותו על ידי סיום תהליך או שלילת משאב."
+   },
+   {
+    "name": "מניעה",
+    "importance": 0.845,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "התנאים הללו נקראים תנאי קופמן, והם הבסיס לכל שיטות המניעה."
+   },
+   {
+    "name": "מתרחש",
+    "importance": 0.845,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כשהאירוע שהתהליך חיכה לו מתרחש, הוא חוזר לready ולא ישר לrunning, כי ייתכן שתהליך אחר כבר משתמש במעבד."
+   },
+   {
+    "name": "גישה",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "גישה לזיכרון משותף ותחרות"
+   },
+   {
+    "name": "גישה לזיכרון",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כל גישה לזיכרון דורשת כעת שתי גישות:"
+   },
+   {
+    "name": "לזיכרון",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "בלי ההפרדה, תוכנית אחת הייתה יכולה לכבות את הפסיקות או לכתוב לזיכרון של מערכת ההפעלה ולהפיל את כל המחשב."
+   },
+   {
+    "name": "משותף",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "גישה לזיכרון משותף ותחרות"
+   },
+   {
+    "name": "סמפורים",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "ההבדל בין שני סוגי הסמפורים הוא במספר המשאבים שהם מייצגים."
+   },
+   {
+    "name": "הליבה",
+    "importance": 0.812,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הליבה בודקת את הבקשה ומחליטה אם לאשר אותה או לסיים את התוכנית שביקשה."
+   },
+   {
+    "name": "חומרה",
+    "importance": 0.812,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מערכת הפעלה כמתווכת בין חומרה לתוכנה"
+   },
+   {
+    "name": "משתמש",
+    "importance": 0.812,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "כל השאר, כולל הדפדפן, עורך הטקסט והshell, רץ במצב משתמש (user mode) עם הרשאות מוגבלות."
+   },
+   {
+    "name": "תוכנה",
+    "importance": 0.812,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מערכת הפעלה כמתווכת בין חומרה לתוכנה"
+   },
+   {
+    "name": "תכנון",
+    "importance": 0.812,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מטרות התכנון של מערכת הפעלה"
+   },
+   {
+    "name": "גרעין",
+    "importance": 0.774,
+    "anchored": false,
+    "kind": "formula",
+    "passage": "$(\\ker nel($"
+   },
+   {
+    "name": "cache",
+    "importance": 0.449,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "בנוסף, החלפה מבטלת חלק מהנתונים שנמצאים במטמון (cache) של המעבד, ולכן העלות בפועל גבוהה מזו שנשמרת בPCB."
+   },
+   {
+    "name": "pcb",
+    "importance": 0.449,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הPCB מכיל את מזהה התהליך )PID), את ערכי הרגיסטרים שנשמרו, את טבלת הקבצים הפתוחים ואת מידע על הזיכרון של התהליך."
+   }
+  ]
+ }
+}

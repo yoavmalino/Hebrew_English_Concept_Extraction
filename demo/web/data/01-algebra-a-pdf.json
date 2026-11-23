@@ -1,0 +1,2198 @@
+{
+ "versions": {
+  "hebmath": "1.1.0",
+  "concept_pipeline": "dev"
+ },
+ "mode": "algorithmic",
+ "stage1": {
+  "format": "pdf",
+  "characters": 19936,
+  "excerpt": "1 מערכות משוואות לינאריות\n\nמערכות משוואות לינאריות הן הבסיס לכל שאר הקורס, כי מטריצות, דטרמיננטות והעתקות לינאריות נוצרו כדי לתאר ולפתור מערכות כאלה. בפרק זה נלמד לכתוב מערכת בצורה קומפקטית ולפתור אותה בשיטה שיטתית שאפשר לתכנת. הכלי המרכזי הוא דירוג גאוס, ודרכו נדע מתי למערכת אין פתרון, מתי יש פתרון יחיד ומתי יש אינסוף פתרונות. כדאי לזכור שכל שיטה שנלמד כאן מבוססת על שימור קבוצת הפתרונות בכל שלב.\n\n1.1 צורה מטריציונית של מערכת\n\nמערכת משוואות לינאריות מעל שדה $F$ עם $m$ משוואות ו־$n$ נעלמים היא אוסף של משוואות מהצורה\n$a_{i1}x_{1}+\\cdots+$\n$a_{in}x_{n}=b_{i}$\nלכל $i$ בין 1 ל־$m$. המספרים $a_{ij}$",
+  "sections": [
+   {
+    "title": "1 מערכות משוואות לינאריות",
+    "level": 1
+   },
+   {
+    "title": "1.1 צורה מטריציונית של מערכת",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: פתרון של מערכת",
+    "level": 4
+   },
+   {
+    "title": "הערה: המטריצה המורחבת",
+    "level": 4
+   },
+   {
+    "title": "1.2 דירוג גאוס",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: מטריצה מדורגת",
+    "level": 4
+   },
+   {
+    "title": "הגדרה: מטריצה מדורגת קנונית",
+    "level": 4
+   },
+   {
+    "title": "1.2.1 שלבי הדירוג",
+    "level": 3
+   },
+   {
+    "title": "דוגמה 1: דירוג מטריצה 2 על 3",
+    "level": 4
+   },
+   {
+    "title": "1.2.2 דרגה של מטריצה",
+    "level": 3
+   },
+   {
+    "title": "1.3 פתרונות של מערכת כללית",
+    "level": 2
+   },
+   {
+    "title": "משפט: קיום פתרון",
+    "level": 4
+   },
+   {
+    "title": "1.3.1 מערכת הומוגנית",
+    "level": 3
+   },
+   {
+    "title": "1.3.2 מערכת לא הומוגנית",
+    "level": 3
+   },
+   {
+    "title": "2 מרחבים וקטוריים",
+    "level": 1
+   },
+   {
+    "title": "2.1 הגדרת מרחב וקטורי",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: מרחב וקטורי",
+    "level": 4
+   },
+   {
+    "title": "דוגמה 2: מרחב הפונקציות",
+    "level": 4
+   },
+   {
+    "title": "2.1.1 אקסיומות חשובות בפועל",
+    "level": 3
+   },
+   {
+    "title": "2.1.2 פונקציה כמרחב",
+    "level": 3
+   },
+   {
+    "title": "2.2 צירוף לינארי ותלות לינארית",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: צירוף לינארי",
+    "level": 4
+   },
+   {
+    "title": "הגדרה: תלות לינארית",
+    "level": 4
+   },
+   {
+    "title": "משפט: תלות לפי צירוף",
+    "level": 4
+   },
+   {
+    "title": "2.2.1 בדיקה באמצעות דירוג",
+    "level": 3
+   },
+   {
+    "title": "הערה: וקטור האפס",
+    "level": 4
+   },
+   {
+    "title": "2.3 תתמרחבים",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: תתמרחב",
+    "level": 4
+   },
+   {
+    "title": "משפט: קריטריון לתתמרחב",
+    "level": 4
+   },
+   {
+    "title": "הערה: הוקטור האפס",
+    "level": 4
+   },
+   {
+    "title": "2.4 מימד של תתמרחבים",
+    "level": 2
+   },
+   {
+    "title": "משפט: נוסחת המימד לסכום",
+    "level": 4
+   },
+   {
+    "title": "3 בסיס ומימד",
+    "level": 1
+   },
+   {
+    "title": "3.1 בסיס של מרחב",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: בסיס",
+    "level": 4
+   },
+   {
+    "title": "3.1.1 בסיס סטנדרטי",
+    "level": 3
+   },
+   {
+    "title": "3.1.2 מציאת בסיס בדירוג",
+    "level": 3
+   },
+   {
+    "title": "3.2 משפט ההחלפה",
+    "level": 2
+   },
+   {
+    "title": "למת ההחלפה",
+    "level": 4
+   },
+   {
+    "title": "3.3 מימד של תתמרחבים",
+    "level": 2
+   },
+   {
+    "title": "הערה: בדיקה של שוויון מרחבים",
+    "level": 4
+   },
+   {
+    "title": "4 העתקות לינאריות",
+    "level": 1
+   },
+   {
+    "title": "4.1 הגדרה ודוגמאות",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: העתקה לינארית",
+    "level": 4
+   },
+   {
+    "title": "דוגמה 3: היטל על מישור",
+    "level": 4
+   },
+   {
+    "title": "דוגמה 4: העתקה שאינה לינארית",
+    "level": 4
+   },
+   {
+    "title": "4.2 גרעין ותמונה",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: גרעין ותמונה",
+    "level": 4
+   },
+   {
+    "title": "משפט המימדים",
+    "level": 4
+   },
+   {
+    "title": "4.2.1 תנאי לחדחדערכיות",
+    "level": 3
+   },
+   {
+    "title": "4.2.2 חדחדערכיות ועל",
+    "level": 3
+   },
+   {
+    "title": "מסקנה: שקילות בין חדחדערכיות לעל",
+    "level": 4
+   },
+   {
+    "title": "4.3 ייצוג מטריציוני",
+    "level": 2
+   },
+   {
+    "title": "משפט: הייצוג המטריציוני",
+    "level": 4
+   },
+   {
+    "title": "הערה: מטריצת שינוי בסיס",
+    "level": 4
+   },
+   {
+    "title": "5 דטרמיננטה",
+    "level": 1
+   },
+   {
+    "title": "5.1 הגדרה ותכונות",
+    "level": 2
+   },
+   {
+    "title": "הגדרה: דטרמיננטה של מטריצה 2 על 2",
+    "level": 4
+   },
+   {
+    "title": "5.1.1 תכונות הדטרמיננטה",
+    "level": 3
+   },
+   {
+    "title": "5.1.2 חישוב בעזרת דירוג",
+    "level": 3
+   }
+  ],
+  "section_count": 79,
+  "units": {
+   "paragraph": 42,
+   "definition": 15,
+   "remark": 6,
+   "example": 5,
+   "theorem": 13,
+   "proof": 7,
+   "exercise": 2
+  },
+  "signal_share": {
+   "bold": 0.117,
+   "underline": 0.0,
+   "size": 0.027,
+   "line": 0.094
+  },
+  "warnings": [
+   "3 embedded font(s) had no Unicode mapping; 18/18 distinct glyphs were identified by shape"
+  ]
+ },
+ "stage2": {
+  "candidates": 488,
+  "words": 2800,
+  "language": "he",
+  "top": [
+   {
+    "name": "מטריצה",
+    "count": 51,
+    "sources": [
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "וקטור",
+    "count": 44,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "בסיס",
+    "count": 39,
+    "sources": [
+     "definition",
+     "heading",
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "מרחב",
+    "count": 39,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "דטרמיננטה",
+    "count": 33,
+    "sources": [
+     "heading",
+     "ngram",
+     "operator",
+     "label"
+    ]
+   },
+   {
+    "name": "וקטורים",
+    "count": 29,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "המערכת",
+    "count": 28,
+    "sources": [
+     "definition",
+     "heading",
+     "ngram",
+     "label"
+    ]
+   },
+   {
+    "name": "שורה",
+    "count": 25,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "פתרון",
+    "count": 24,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "העתקה",
+    "count": 23,
+    "sources": [
+     "emphasis",
+     "ngram",
+     "label"
+    ]
+   },
+   {
+    "name": "לינארית",
+    "count": 22,
+    "sources": [
+     "emphasis",
+     "ngram",
+     "label"
+    ]
+   },
+   {
+    "name": "עצמיים",
+    "count": 20,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "קבוצה",
+    "count": 20,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "צירוף",
+    "count": 19,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "דירוג",
+    "count": 18,
+    "sources": [
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "האפס",
+    "count": 17,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "עצמי",
+    "count": 16,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "ערכים",
+    "count": 16,
+    "sources": [
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "המימד",
+    "count": 15,
+    "sources": [
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "תתמרחב",
+    "count": 15,
+    "sources": [
+     "heading",
+     "ngram",
+     "label"
+    ]
+   },
+   {
+    "name": "בלתי",
+    "count": 14,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "הגרעין",
+    "count": 13,
+    "sources": [
+     "emphasis",
+     "ngram",
+     "operator"
+    ]
+   },
+   {
+    "name": "כפל",
+    "count": 13,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מספר",
+    "count": 13,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "תלויה",
+    "count": 13,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "איבר",
+    "count": 12,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "העמודות",
+    "count": 12,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "ערכים עצמיים",
+    "count": 12,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "הפתרונות",
+    "count": 12,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "בסקלר",
+    "count": 11,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "מדורגת",
+    "count": 11,
+    "sources": [
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "משוואות",
+    "count": 11,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "ערך",
+    "count": 11,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "שורות",
+    "count": 11,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "הדרגה",
+    "count": 10,
+    "sources": [
+     "emphasis",
+     "ngram"
+    ]
+   },
+   {
+    "name": "הומוגנית",
+    "count": 10,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "ורק",
+    "count": 10,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "טריוויאלי",
+    "count": 10,
+    "sources": [
+     "ngram"
+    ]
+   },
+   {
+    "name": "תתמרחבים",
+    "count": 10,
+    "sources": [
+     "heading",
+     "ngram",
+     "label"
+    ]
+   },
+   {
+    "name": "אפסים",
+    "count": 9,
+    "sources": [
+     "ngram"
+    ]
+   }
+  ]
+ },
+ "stage4": {
+  "pairs": 21,
+  "pairs_by_finder": {
+   "named": 1,
+   "spelling": 14,
+   "typo": 10
+  },
+  "merged_by_rule": [
+   [
+    "המימדים",
+    "משפט המימדים"
+   ]
+  ],
+  "merged_by_rule_count": 1,
+  "left_apart": 20,
+  "fragments_absorbed": 70,
+  "concepts": 417
+ },
+ "stage5": {
+  "t_signal": "off",
+  "weights": {
+   "Q": 0.2049,
+   "R": 0.0,
+   "T": 0.2108,
+   "M": 0.122,
+   "L": 0.084,
+   "V_b": 0.1431,
+   "V_u": 0.1452,
+   "V_s": 0.09
+  },
+  "top": [
+   {
+    "name": "בסיס",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.8,
+     "M": 0.823,
+     "V_b": 0.992,
+     "V_u": 0.0,
+     "V_s": 0.75,
+     "L": 0.984
+    }
+   },
+   {
+    "name": "גרעין ותמונה",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "כלל קרמר",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.231,
+     "M": 0.0,
+     "V_b": 0.938,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "מערכת",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.776,
+     "M": 0.646,
+     "V_b": 0.992,
+     "V_u": 0.0,
+     "V_s": 0.75,
+     "L": 0.969
+    }
+   },
+   {
+    "name": "פולינום אופייני",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.268,
+     "M": 0.0,
+     "V_b": 0.875,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "צירוף לינארי",
+    "importance": 1.0,
+    "signals": {
+     "Q": 0.875,
+     "R": 0.549,
+     "M": 0.823,
+     "V_b": 0.875,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "מטריצה מדורגת",
+    "importance": 0.994,
+    "signals": {
+     "Q": 0.938,
+     "R": 0.435,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "מרחב וקטורי",
+    "importance": 0.994,
+    "signals": {
+     "Q": 0.875,
+     "R": 0.359,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "וקטור עצמי",
+    "importance": 0.991,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.396,
+     "M": 0.912,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "מימד",
+    "importance": 0.991,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.631,
+     "M": 0.0,
+     "V_b": 0.969,
+     "V_u": 0.0,
+     "V_s": 0.875,
+     "L": 0.938
+    }
+   },
+   {
+    "name": "העתקה לינארית",
+    "importance": 0.991,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.324,
+     "M": 0.5,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "דטרמיננטה",
+    "importance": 0.99,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.561,
+     "M": 0.997,
+     "V_b": 0.938,
+     "V_u": 0.0,
+     "V_s": 0.75,
+     "L": 0.938
+    }
+   },
+   {
+    "name": "מטריצה מדורגת קנונית",
+    "importance": 0.988,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "תלות לינארית",
+    "importance": 0.988,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "ערך עצמי",
+    "importance": 0.982,
+    "signals": {
+     "Q": 0.875,
+     "R": 0.372,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "בדיקה של שוויון מרחבים",
+    "importance": 0.982,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "מדורגת קנונית",
+    "importance": 0.982,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.25,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "תלויה לינארית",
+    "importance": 0.982,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.449,
+     "M": 0.875,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.0
+    }
+   },
+   {
+    "name": "משפט המימדים",
+    "importance": 0.981,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.334,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "כללית נעשית",
+    "importance": 0.979,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.25,
+     "M": 0.875,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.0
+    }
+   },
+   {
+    "name": "דירוג",
+    "importance": 0.976,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.754,
+     "M": 0.0,
+     "V_b": 0.996,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.984
+    }
+   },
+   {
+    "name": "וקטור אפס",
+    "importance": 0.976,
+    "signals": {
+     "Q": 0.75,
+     "R": 0.536,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "לכסינות",
+    "importance": 0.973,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "ההחלפה",
+    "importance": 0.973,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "ייצוג מטריציוני",
+    "importance": 0.972,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.75,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "מרחב",
+    "importance": 0.97,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.817,
+     "M": 0.0,
+     "V_b": 0.969,
+     "V_u": 0.0,
+     "V_s": 0.75,
+     "L": 0.969
+    }
+   },
+   {
+    "name": "כלל",
+    "importance": 0.969,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.501,
+     "M": 0.0,
+     "V_b": 0.938,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "ומשמעות גיאומטרית",
+    "importance": 0.965,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "גרעין",
+    "importance": 0.963,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.379,
+     "M": 0.5,
+     "V_b": 0.875,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.75
+    }
+   },
+   {
+    "name": "דירוג מטריצה",
+    "importance": 0.961,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.191,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "המטריצה המורחבת",
+    "importance": 0.961,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.301,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "פתרון של מערכת",
+    "importance": 0.961,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.191,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "קיום פתרון",
+    "importance": 0.961,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "צירוף",
+    "importance": 0.96,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.731,
+     "M": 0.0,
+     "V_b": 0.938,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "תלות",
+    "importance": 0.96,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.456,
+     "M": 0.0,
+     "V_b": 0.938,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.875
+    }
+   },
+   {
+    "name": "עצמיים",
+    "importance": 0.956,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.552,
+     "M": 0.0,
+     "V_b": 0.938,
+     "V_u": 0.0,
+     "V_s": 0.75,
+     "L": 0.938
+    }
+   },
+   {
+    "name": "לינארית",
+    "importance": 0.951,
+    "signals": {
+     "Q": 0.0,
+     "R": 0.771,
+     "M": 0.0,
+     "V_b": 0.992,
+     "V_u": 0.0,
+     "V_s": 0.5,
+     "L": 0.938
+    }
+   },
+   {
+    "name": "דטרמיננטה של מטריצה",
+    "importance": 0.948,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.191,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "שימוש בכלל קרמר",
+    "importance": 0.948,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   },
+   {
+    "name": "תנאי להפיכות",
+    "importance": 0.948,
+    "signals": {
+     "Q": 0.5,
+     "R": 0.146,
+     "M": 0.0,
+     "V_b": 0.5,
+     "V_u": 0.0,
+     "V_s": 0.0,
+     "L": 0.5
+    }
+   }
+  ]
+ },
+ "stage6": {
+  "pool": 267,
+  "report": {
+   "anchored": 91,
+   "anchored_over_cap": 0,
+   "hidden": 0
+  },
+  "nodes": [
+   {
+    "name": "בסיס",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "לכן המקדמים של כל וקטור לפי הבסיס מוגדרים היטב, והם נקראים הקואורדינטות שלו."
+   },
+   {
+    "name": "גרעין ותמונה",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "גרעין ותמונה"
+   },
+   {
+    "name": "כלל קרמר",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הדטרמיננטה גם מופיעה בחישוב נפחים, בכלל קרמר ובהגדרה של ערכים עצמיים."
+   },
+   {
+    "name": "מערכת",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "פתרון של המערכת הוא וקטור"
+   },
+   {
+    "name": "פולינום אופייני",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "ערכים עצמיים הם שורשי הפולינום האופייני"
+   },
+   {
+    "name": "צירוף לינארי",
+    "importance": 1.0,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "וקטור w נקרא צירוף לינארי של הוקטורים $v_{k}$ , ."
+   },
+   {
+    "name": "מטריצה מדורגת",
+    "importance": 0.994,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "מטריצה מדורגת נקראת מדורגת קנונית אם כל איבר ראשי שווה ל־1, וכל עמודה שמכילה איבר ראשי מכילה אפסים בכל שאר מקומותיה."
+   },
+   {
+    "name": "מרחב וקטורי",
+    "importance": 0.994,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "מרחב וקטורי הוא הכללה של המישור והמרחב התלתממדי המוכרים, והמושג מאפשר לדבר על וקטורים בלי להתייחס לאופן הייצוג שלהם."
+   },
+   {
+    "name": "וקטור עצמי",
+    "importance": 0.991,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הוקטור v נקרא וקטור עצמי השייך ל־$\\lambda$."
+   },
+   {
+    "name": "העתקה לינארית",
+    "importance": 0.991,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "העתקה לינארית היא פונקציה בין מרחבים וקטוריים ששומרת על החיבור ועל הכפל בסקלר."
+   },
+   {
+    "name": "דטרמיננטה",
+    "importance": 0.99,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "דטרמיננטה של מטריצה 2 על 2"
+   },
+   {
+    "name": "מטריצה מדורגת קנונית",
+    "importance": 0.988,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "מטריצה מדורגת קנונית"
+   },
+   {
+    "name": "תלות לינארית",
+    "importance": 0.988,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "2 צירוף לינארי ותלות לינארית"
+   },
+   {
+    "name": "ערך עצמי",
+    "importance": 0.982,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "סקלר $\\lambda$ נקרא ערך עצמי של $A$ אם קיים וקטור"
+   },
+   {
+    "name": "בדיקה של שוויון מרחבים",
+    "importance": 0.982,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "בדיקה של שוויון מרחבים"
+   },
+   {
+    "name": "מדורגת קנונית",
+    "importance": 0.982,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "מטריצה מדורגת נקראת מדורגת קנונית אם כל איבר ראשי שווה ל־1, וכל עמודה שמכילה איבר ראשי מכילה אפסים בכל שאר מקומותיה."
+   },
+   {
+    "name": "תלויה לינארית",
+    "importance": 0.982,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "נקראת תלויה לינארית אם קיימים סקלרים $\\alpha_{k}$ , ."
+   },
+   {
+    "name": "משפט המימדים",
+    "importance": 0.981,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "כדי להראות ששני תתמרחבים שווים, מספיק להראות שאחד מוכל בשני ושהמימדים שווים."
+   },
+   {
+    "name": "כללית נעשית",
+    "importance": 0.979,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הגדרה כללית נעשית באמצעות פיתוח לפי שורה."
+   },
+   {
+    "name": "וקטור אפס",
+    "importance": 0.976,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "למערכת כזו יש תמיד לפחות פתרון אחד, הוקטור האפס, ולכן השאלה המעניינת היא אם יש עוד פתרונות."
+   },
+   {
+    "name": "לכסינות",
+    "importance": 0.973,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "לכסינות"
+   },
+   {
+    "name": "ההחלפה",
+    "importance": 0.973,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 משפט ההחלפה"
+   },
+   {
+    "name": "ייצוג מטריציוני",
+    "importance": 0.972,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הייצוג המטריציוני"
+   },
+   {
+    "name": "ומשמעות גיאומטרית",
+    "importance": 0.965,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "1 הגדרה ומשמעות גיאומטרית"
+   },
+   {
+    "name": "דירוג מטריצה",
+    "importance": 0.961,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "נפתרת על ידי דירוג המטריצה המורחבת."
+   },
+   {
+    "name": "המטריצה המורחבת",
+    "importance": 0.961,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "נפתרת על ידי דירוג המטריצה המורחבת."
+   },
+   {
+    "name": "פתרון של מערכת",
+    "importance": 0.961,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "פתרון של מערכת"
+   },
+   {
+    "name": "קיום פתרון",
+    "importance": 0.961,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "קיום פתרון"
+   },
+   {
+    "name": "דטרמיננטה של מטריצה",
+    "importance": 0.948,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "אם $M$ הוא הדטרמיננטה של המטריצה שמתקבלת מ־$A$ בהסרת השורה ה־$i$ והעמודה ה־$j$, אז"
+   },
+   {
+    "name": "שימוש בכלל קרמר",
+    "importance": 0.948,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "שימוש בכלל קרמר"
+   },
+   {
+    "name": "תנאי להפיכות",
+    "importance": 0.948,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "תנאי להפיכות"
+   },
+   {
+    "name": "בסיס ומימד",
+    "importance": 0.946,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "3 בסיס ומימד"
+   },
+   {
+    "name": "בסיס של מרחב",
+    "importance": 0.946,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הטענה הזו נשענת ישירות על מציאת בסיס לתתמרחב והשלמתו לבסיס של המרחב."
+   },
+   {
+    "name": "מימד של תתמרחבים",
+    "importance": 0.946,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "4 מימד של תתמרחבים"
+   },
+   {
+    "name": "משפט ההחלפה",
+    "importance": 0.946,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 משפט ההחלפה"
+   },
+   {
+    "name": "היטל על מישור",
+    "importance": 0.94,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "היטל על מישור"
+   },
+   {
+    "name": "העתקה שאינה לינארית",
+    "importance": 0.94,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "העתקה שאינה לינארית"
+   },
+   {
+    "name": "מטריצת שינוי בסיס",
+    "importance": 0.94,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "מטריצת שינוי בסיס"
+   },
+   {
+    "name": "שקילות בין חדחדערכיות לעל",
+    "importance": 0.94,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "שקילות בין חדחדערכיות לעל"
+   },
+   {
+    "name": "מרחב הפונקציות",
+    "importance": 0.936,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "מרחב הפונקציות"
+   },
+   {
+    "name": "נוסחת המימד לסכום",
+    "importance": 0.936,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "נוסחת המימד לסכום"
+   },
+   {
+    "name": "קריטריון לתתמרחב",
+    "importance": 0.936,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "קריטריון לתתמרחב"
+   },
+   {
+    "name": "תלות לפי צירוף",
+    "importance": 0.936,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "תלות לפי צירוף"
+   },
+   {
+    "name": "תכונות",
+    "importance": 0.927,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 הגדרה ותכונות"
+   },
+   {
+    "name": "וקטור עצמי אינו האפס",
+    "importance": 0.92,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "וקטור עצמי אינו האפס"
+   },
+   {
+    "name": "ערכים עצמיים הם שורשי הפולינום האופייני",
+    "importance": 0.92,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "ערכים עצמיים הם שורשי הפולינום האופייני"
+   },
+   {
+    "name": "ערכים עצמיים שונים",
+    "importance": 0.92,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "בפרט, אם יש $n$ ערכים עצמיים שונים זה מזה, המטריצה לכסינה בוודאות, כי וקטורים עצמיים השייכים לערכים שונים בלתי תלויים לינארית."
+   },
+   {
+    "name": "תתמרחב",
+    "importance": 0.915,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "תתמרחב הוא תתקבוצה של מרחב שהיא עצמה מרחב וקטורי עם אותן פעולות."
+   },
+   {
+    "name": "כללית נעשית באמצעות",
+    "importance": 0.911,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הגדרה כללית נעשית באמצעות פיתוח לפי שורה."
+   },
+   {
+    "name": "כללית נעשית באמצעות פיתוח",
+    "importance": 0.911,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הגדרה כללית נעשית באמצעות פיתוח לפי שורה."
+   },
+   {
+    "name": "לכסון",
+    "importance": 0.903,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "אחת התועלות הגדולות של לכסון היא חישוב חזקות."
+   },
+   {
+    "name": "איבר ראשי",
+    "importance": 0.901,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "האיבר הראשון השונה מאפס בכל שורה נקרא איבר ראשי או ציר."
+   },
+   {
+    "name": "קבוצת הפתרונות",
+    "importance": 0.901,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "קבוצת כל הפתרונות נקראת קבוצת הפתרונות של המערכת, והיא יכולה להיות ריקה."
+   },
+   {
+    "name": "וקטור עצמי השייך",
+    "importance": 0.894,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "הוקטור v נקרא וקטור עצמי השייך ל־$\\lambda$."
+   },
+   {
+    "name": "דטרמיננטה ואיסינגולריות",
+    "importance": 0.891,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 דטרמיננטה ואיסינגולריות"
+   },
+   {
+    "name": "הגדרה ותכונות",
+    "importance": 0.891,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 הגדרה ותכונות"
+   },
+   {
+    "name": "בסיס סטנדרטי",
+    "importance": 0.887,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "ב־$R^{n}$ הבסיס הסטנדרטי הוא"
+   },
+   {
+    "name": "למת ההחלפה",
+    "importance": 0.887,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "למת ההחלפה"
+   },
+   {
+    "name": "מציאת בסיס בדירוג",
+    "importance": 0.887,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 מציאת בסיס בדירוג"
+   },
+   {
+    "name": "הגדרת מרחב וקטורי",
+    "importance": 0.881,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 הגדרת מרחב וקטורי"
+   },
+   {
+    "name": "מרחבים וקטוריים",
+    "importance": 0.881,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "העתקה לינארית היא פונקציה בין מרחבים וקטוריים ששומרת על החיבור ועל הכפל בסקלר."
+   },
+   {
+    "name": "צירוף לינארי ותלות לינארית",
+    "importance": 0.881,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 צירוף לינארי ותלות לינארית"
+   },
+   {
+    "name": "הגדרה ודוגמאות",
+    "importance": 0.87,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 הגדרה ודוגמאות"
+   },
+   {
+    "name": "העתקות לינאריות",
+    "importance": 0.87,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "מערכות משוואות לינאריות הן הבסיס לכל שאר הקורס, כי מטריצות, דטרמיננטות והעתקות לינאריות נוצרו כדי לתאר ולפתור מערכות כאלה."
+   },
+   {
+    "name": "ודוגמאות",
+    "importance": 0.87,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 הגדרה ודוגמאות"
+   },
+   {
+    "name": "הגדרה ומשמעות גיאומטרית",
+    "importance": 0.858,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 הגדרה ומשמעות גיאומטרית"
+   },
+   {
+    "name": "ערכים עצמיים ווקטורים עצמיים",
+    "importance": 0.858,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "ערכים עצמיים ווקטורים עצמיים מתארים את הכיוונים שבהם העתקה נשארת על אותו ישר."
+   },
+   {
+    "name": "דירוג גאוס",
+    "importance": 0.855,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הכלי המרכזי הוא דירוג גאוס, ודרכו נדע מתי למערכת אין פתרון, מתי יש פתרון יחיד ומתי יש אינסוף פתרונות."
+   },
+   {
+    "name": "מטריציונית של מערכת",
+    "importance": 0.855,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 צורה מטריציונית של מערכת"
+   },
+   {
+    "name": "מערכות משוואות לינאריות",
+    "importance": 0.855,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "מערכות משוואות לינאריות הן הבסיס לכל שאר הקורס, כי מטריצות, דטרמיננטות והעתקות לינאריות נוצרו כדי לתאר ולפתור מערכות כאלה."
+   },
+   {
+    "name": "פתרונות של מערכת כללית",
+    "importance": 0.855,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "3 פתרונות של מערכת כללית"
+   },
+   {
+    "name": "צורה מטריציונית של מערכת",
+    "importance": 0.855,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 צורה מטריציונית של מערכת"
+   },
+   {
+    "name": "פעולות",
+    "importance": 0.848,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "כאשר מגדירים מרחב של פונקציות, ההוכחה נשענת על כך שהפעולות מוגדרות נקודתית, כלומר"
+   },
+   {
+    "name": "חישוב בעזרת דירוג",
+    "importance": 0.839,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 חישוב בעזרת דירוג"
+   },
+   {
+    "name": "תכונות הדטרמיננטה",
+    "importance": 0.839,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 תכונות הדטרמיננטה"
+   },
+   {
+    "name": "תתמרחבים",
+    "importance": 0.829,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "חיתוך של תתמרחבים הוא תתמרחב, וזו טענה שמוכחת ישירות מהקריטריון."
+   },
+   {
+    "name": "דרגה של מטריצה",
+    "importance": 0.825,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הדרגה של מטריצה היא מספר השורות השונות מאפס במטריצה המדורגת שלה, והיא שווה גם למספר העמודות שמכילות איבר ראשי."
+   },
+   {
+    "name": "מערכת הומוגנית",
+    "importance": 0.825,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "במערכת הומוגנית או לא הומוגנית, הדרגה קובעת כמה משתנים חופשיים יש לפתרון."
+   },
+   {
+    "name": "האיברים החופשיים",
+    "importance": 0.813,
+    "anchored": true,
+    "kind": "definition",
+    "passage": "המספרים $a_{ij}$ נקראים המקדמים, והמספרים $b_{i}$ נקראים האיברים החופשיים."
+   },
+   {
+    "name": "תנאי לחדחדערכיות",
+    "importance": 0.81,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 תנאי לחדחדערכיות"
+   },
+   {
+    "name": "מערכת לא הומוגנית",
+    "importance": 0.804,
+    "anchored": true,
+    "kind": "co_mention",
+    "passage": "הפתרון הכללי של מערכת לא הומוגנית הוא סכום של פתרון פרטי אחד עם הפתרון הכללי של המערכת ההומוגנית המתאימה."
+   },
+   {
+    "name": "שלבי הדירוג",
+    "importance": 0.804,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 שלבי הדירוג"
+   },
+   {
+    "name": "אקסיומות חשובות בפועל",
+    "importance": 0.796,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 אקסיומות חשובות בפועל"
+   },
+   {
+    "name": "בדיקה באמצעות דירוג",
+    "importance": 0.796,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 בדיקה באמצעות דירוג"
+   },
+   {
+    "name": "פונקציה כמרחב",
+    "importance": 0.796,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 פונקציה כמרחב"
+   },
+   {
+    "name": "דוגמה מספרית",
+    "importance": 0.757,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 דוגמה מספרית"
+   },
+   {
+    "name": "מספרית",
+    "importance": 0.757,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 דוגמה מספרית"
+   },
+   {
+    "name": "ריבוי אלגברי וגאומטרי",
+    "importance": 0.757,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 ריבוי אלגברי וגאומטרי"
+   },
+   {
+    "name": "שימוש בלכסון",
+    "importance": 0.757,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 שימוש בלכסון"
+   },
+   {
+    "name": "תנאי לכסינות",
+    "importance": 0.757,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "1 תנאי לכסינות"
+   },
+   {
+    "name": "חדחדערכיות ועל",
+    "importance": 0.741,
+    "anchored": true,
+    "kind": "subject",
+    "passage": "2 חדחדערכיות ועל"
+   },
+   {
+    "name": "מימד",
+    "importance": 0.991,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "מספר זה נקרא המימד של המרחב ומסומן"
+   },
+   {
+    "name": "דירוג",
+    "importance": 0.976,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "דירוג הוא תהליך שמטרתו להפוך מטריצה לצורה מדורגת באמצעות פעולות שורה אלמנטריות."
+   },
+   {
+    "name": "מרחב",
+    "importance": 0.97,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הוא צירוף לינארי של עמודות $A$, ולכן הוספת העמודה b אינה משנה את מרחב העמודות ואת הדרגה."
+   },
+   {
+    "name": "כלל",
+    "importance": 0.969,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "כלל קרמר נוח לתיאוריה ולמערכות קטנות, אבל לא לחישוב של מערכות גדולות."
+   },
+   {
+    "name": "גרעין",
+    "importance": 0.963,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "הגרעין של $T$ הוא אוסף כל הוקטורים ש־$T$ שולחת לאפס, והתמונה היא אוסף כל הערכים שמתקבלים."
+   },
+   {
+    "name": "צירוף",
+    "importance": 0.96,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הוא צירוף לינארי של עמודות $A$, ולכן הוספת העמודה b אינה משנה את מרחב העמודות ואת הדרגה."
+   },
+   {
+    "name": "תלות",
+    "importance": 0.96,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "התלות היא מושג מרכזי כי היא קובעת אם יש וקטור מיותר בקבוצה."
+   },
+   {
+    "name": "עצמיים",
+    "importance": 0.956,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "ערכים עצמיים הם שורשי הפולינום האופייני"
+   },
+   {
+    "name": "לינארית",
+    "importance": 0.951,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "2 צירוף לינארי ותלות לינארית"
+   },
+   {
+    "name": "מטריצה",
+    "importance": 0.946,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "דטרמיננטה של מטריצה 2 על 2"
+   },
+   {
+    "name": "ערכים",
+    "importance": 0.942,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "ערכים עצמיים הם שורשי הפולינום האופייני"
+   },
+   {
+    "name": "ערכים עצמיים",
+    "importance": 0.942,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "ערכים עצמיים הם שורשי הפולינום האופייני"
+   },
+   {
+    "name": "לינאריות",
+    "importance": 0.933,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "1 מערכות משוואות לינאריות"
+   },
+   {
+    "name": "מטריציונית",
+    "importance": 0.925,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "1 צורה מטריציונית של מערכת"
+   },
+   {
+    "name": "משוואות",
+    "importance": 0.925,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "1 מערכות משוואות לינאריות"
+   },
+   {
+    "name": "משוואות לינאריות",
+    "importance": 0.925,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מערכות משוואות לינאריות הן הבסיס לכל שאר הקורס, כי מטריצות, דטרמיננטות והעתקות לינאריות נוצרו כדי לתאר ולפתור מערכות כאלה."
+   },
+   {
+    "name": "פתרונות",
+    "importance": 0.925,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הכלי המרכזי הוא דירוג גאוס, ודרכו נדע מתי למערכת אין פתרון, מתי יש פתרון יחיד ומתי יש אינסוף פתרונות."
+   },
+   {
+    "name": "פתרונות של מערכת",
+    "importance": 0.925,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "קבוצת כל הפתרונות נקראת קבוצת הפתרונות של המערכת, והיא יכולה להיות ריקה."
+   },
+   {
+    "name": "ייצוג",
+    "importance": 0.917,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מרחב וקטורי הוא הכללה של המישור והמרחב התלתממדי המוכרים, והמושג מאפשר לדבר על וקטורים בלי להתייחס לאופן הייצוג שלהם."
+   },
+   {
+    "name": "אפס",
+    "importance": 0.905,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "וקטור עצמי אינו האפס"
+   },
+   {
+    "name": "וקטור",
+    "importance": 0.905,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "פתרון של המערכת הוא וקטור"
+   },
+   {
+    "name": "העתקה",
+    "importance": 0.903,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "העתקה היא חדחדערכית אם ורק אם הגרעין שלה הוא"
+   },
+   {
+    "name": "מדורגת",
+    "importance": 0.892,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "מטריצה נקראת מדורגת אם כל שורה שאינה אפסית מתחילה באפסים, וכל איבר ראשון שונה מאפס בשורה נמצא מימין לאיבר הראשון שונה מאפס בשורה שמעליה."
+   },
+   {
+    "name": "בדיקה",
+    "importance": 0.887,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "בדיקה של שוויון מרחבים"
+   },
+   {
+    "name": "מציאת בסיס",
+    "importance": 0.887,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הטענה הזו נשענת ישירות על מציאת בסיס לתתמרחב והשלמתו לבסיס של המרחב."
+   },
+   {
+    "name": "מרחבים",
+    "importance": 0.887,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "בדיקה של שוויון מרחבים"
+   },
+   {
+    "name": "שוויון",
+    "importance": 0.887,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "בדיקה של שוויון מרחבים"
+   },
+   {
+    "name": "עצמי",
+    "importance": 0.885,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "וקטור עצמי אינו האפס"
+   },
+   {
+    "name": "הומוגנית",
+    "importance": 0.883,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "במערכת הומוגנית או לא הומוגנית, הדרגה קובעת כמה משתנים חופשיים יש לפתרון."
+   },
+   {
+    "name": "פתרון",
+    "importance": 0.883,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הכלי המרכזי הוא דירוג גאוס, ודרכו נדע מתי למערכת אין פתרון, מתי יש פתרון יחיד ומתי יש אינסוף פתרונות."
+   },
+   {
+    "name": "הגדרת מרחב",
+    "importance": 0.881,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "את הגדרת המרחב אפשר להבין כאוסף של עצמים שאפשר לחבר ולכפול בסקלרים באופן שמציית לכללים מסוימים."
+   },
+   {
+    "name": "העתקות",
+    "importance": 0.87,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מערכות משוואות לינאריות הן הבסיס לכל שאר הקורס, כי מטריצות, דטרמיננטות והעתקות לינאריות נוצרו כדי לתאר ולפתור מערכות כאלה."
+   },
+   {
+    "name": "גיאומטרית",
+    "importance": 0.858,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "1 הגדרה ומשמעות גיאומטרית"
+   },
+   {
+    "name": "וקטורים",
+    "importance": 0.858,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "המטרה היא למצוא את כל הוקטורים שמקיימים את כל המשוואות יחד."
+   },
+   {
+    "name": "וקטורים עצמיים",
+    "importance": 0.858,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "6 ערכים עצמיים ווקטורים עצמיים"
+   },
+   {
+    "name": "אקסיומות",
+    "importance": 0.857,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "האקסיומות נראות כמו רשימה יבשה, אבל הן בדיוק מה שמאפשר לעשות חישובים בלי תלות במהות העצמים."
+   },
+   {
+    "name": "סכום",
+    "importance": 0.857,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "הסכום של שני תתמרחבים"
+   },
+   {
+    "name": "כללית",
+    "importance": 0.855,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "3 פתרונות של מערכת כללית"
+   },
+   {
+    "name": "מערכות",
+    "importance": 0.855,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "1 מערכות משוואות לינאריות"
+   },
+   {
+    "name": "בפרט",
+    "importance": 0.843,
+    "anchored": false,
+    "kind": "formula",
+    "passage": "$T(\\alpha u+v)=\\alpha T(u)+T(v)$"
+   },
+   {
+    "name": "הייחודיות",
+    "importance": 0.842,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "הייחודיות של הייצוג היא מה שהופך בסיס לשימושי."
+   },
+   {
+    "name": "מימד של מרחב",
+    "importance": 0.842,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "המימד של מרחב הוא מספר האיברים בכל בסיס שלו, והוא מראה כמה “חופש“ יש בתיאור הוקטורים."
+   },
+   {
+    "name": "בעזרת",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "2 חישוב בעזרת דירוג"
+   },
+   {
+    "name": "הפיכות",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "definition",
+    "passage": "תנאי להפיכות"
+   },
+   {
+    "name": "חישוב",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הדטרמיננטה גם מופיעה בחישוב נפחים, בכלל קרמר ובהגדרה של ערכים עצמיים."
+   },
+   {
+    "name": "תנאי",
+    "importance": 0.839,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "התנאי הזה נבדק בקלות באמצעות דירוג של מטריצת ההעתקה, כי הגרעין הוא מרחב הפתרונות של המערכת ההומוגנית."
+   },
+   {
+    "name": "ולכל",
+    "importance": 0.838,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "ולכל"
+   },
+   {
+    "name": "כך שמתקיימות האקסיומות",
+    "importance": 0.838,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "כך שמתקיימות האקסיומות:"
+   },
+   {
+    "name": "דרגה",
+    "importance": 0.825,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "הדרגה של מטריצה היא מספר השורות השונות מאפס במטריצה המדורגת שלה, והיא שווה גם למספר העמודות שמכילות איבר ראשי."
+   },
+   {
+    "name": "ערך",
+    "importance": 0.819,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הפתרון הפרטי מתקבל כשמציבים את המשתנים החופשיים בערך אפס, והמשתנים התלויים נקבעים מהדירוג."
+   },
+   {
+    "name": "ריבוי",
+    "importance": 0.819,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "הריבוי האלגברי של $\\lambda$ הוא החזקה שבה $\\lambda$ מופיע כשורש של הפולינום האופייני."
+   },
+   {
+    "name": "ריבוי אלגברי",
+    "importance": 0.819,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "הריבוי האלגברי של $\\lambda$ הוא החזקה שבה $\\lambda$ מופיע כשורש של הפולינום האופייני."
+   },
+   {
+    "name": "ועל",
+    "importance": 0.81,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "העתקה לינארית היא פונקציה בין מרחבים וקטוריים ששומרת על החיבור ועל הכפל בסקלר."
+   },
+   {
+    "name": "מטריצת",
+    "importance": 0.81,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "התנאי הזה נבדק בקלות באמצעות דירוג של מטריצת ההעתקה, כי הגרעין הוא מרחב הפתרונות של המערכת ההומוגנית."
+   },
+   {
+    "name": "מישור",
+    "importance": 0.81,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "מרחב וקטורי הוא הכללה של המישור והמרחב התלתממדי המוכרים, והמושג מאפשר לדבר על וקטורים בלי להתייחס לאופן הייצוג שלהם."
+   },
+   {
+    "name": "באמצעות",
+    "importance": 0.796,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "דירוג הוא תהליך שמטרתו להפוך מטריצה לצורה מדורגת באמצעות פעולות שורה אלמנטריות."
+   },
+   {
+    "name": "באמצעות דירוג",
+    "importance": 0.796,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "התנאי הזה נבדק בקלות באמצעות דירוג של מטריצת ההעתקה, כי הגרעין הוא מרחב הפתרונות של המערכת ההומוגנית."
+   },
+   {
+    "name": "בפועל",
+    "importance": 0.796,
+    "anchored": false,
+    "kind": "co_mention",
+    "passage": "1 אקסיומות חשובות בפועל"
+   },
+   {
+    "name": "נוסחת",
+    "importance": 0.796,
+    "anchored": false,
+    "kind": "subject",
+    "passage": "נוסחת ההופכית מראה איך הדטרמיננטה נכנסת לחישוב בפועל:"
+   }
+  ]
+ }
+}

@@ -1,0 +1,9 @@
+{
+  "label": "label",
+  "scheme": "lr_relevant",
+  "p0": 0.0625,
+  "t_max": 4.0,
+  "eta": 1.0,
+  "m0": 5,
+  "combine": "max"
+}

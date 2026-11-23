@@ -1,0 +1,31 @@
+1 Limits
+
+For every
+$\varepsilon>0$
+there is
+$N\in\mathbb{N}$
+with
+$|a_{n}-L|<\varepsilon$
+for all
+$n\ge N$,
+so
+
+$$\lim_{n\to\infty}(1+\frac{1}{n})^{n}=e \tag{1}$$
+
+A nested fraction:
+$\frac{1}{1+\frac{1}{x}}=\frac{x}{x+1}$
+and a root
+$\sqrt{x^{2}+y^{2}}$.
+
+$$\frac{d}{dx}\sin^{2}x=2\sin x\cos x,\quad \int_{-\infty}^{\infty}e^{-x^{2}}dx=\sqrt{\pi}$$
+
+The binomial theorem
+$(a+b)^{n}=\sum_{k=0}^{n}\binom{n}{k}a^{k}b^{n-k}$
+and
+
+$$\prod_{i=1}^{n}x_{i}\le(\frac{x_{1}+\cdots+x_{n}}{n})^{n}$$
+
+Vectors:
+$\vec{v}\cdot\vec{w}=\|v\|\|w\|\cos\theta$
+and
+$f'(x)=\tilde{g}(x)$.

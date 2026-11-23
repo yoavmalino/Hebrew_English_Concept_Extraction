@@ -1,0 +1,11 @@
+hebrew-english-concept-extraction
+Copyright 2026 Yoav Malinovsky
+
+This product includes software developed as part of a private project and released under the
+Apache License, Version 2.0 (see LICENSE).
+
+Third-party components, the fonts behind the glyph atlas and the attribution notices they
+require are listed in extractor/THIRD_PARTY_NOTICES.md. In particular:
+Portions of this software are copyright (c) The FreeType Project (www.freetype.org).
+All rights reserved.
+This software is based in part on the work of the Independent JPEG Group.

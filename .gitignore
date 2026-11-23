@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Never commit calibration data, gold, model caches or results (they live in TACTIMIND_DATA_DIR)
+*.pkl
+*.jsonl
+.env
+.env.*
+
+# Local notes
+CLAUDE.md
+CLAUDE.local.md
+.DS_Store
+
+# Local tool settings
+.claude/

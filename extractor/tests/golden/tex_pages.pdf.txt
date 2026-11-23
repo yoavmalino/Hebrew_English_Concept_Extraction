@@ -1,0 +1,15 @@
+Part one
+
+Some text with
+$a+b=c$
+on the first page.
+
+Part two
+
+More text with
+$\frac{p}{q}$
+on the second page.
+
+Part three
+
+Final text with $x^{2}$ on the third page.

@@ -1,0 +1,17 @@
+# Repository-wide tool settings. The installable packages are extractor/ (hebmath) and
+# pipeline/ (concept_pipeline), each with its own pyproject.toml.
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+# Ruff defaults (pyflakes plus syntax-level pycodestyle): unused imports, undefined names and similar.
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests add the scripts folder to sys.path before importing sibling scripts.
+"tests/*" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "extractor/tests"]

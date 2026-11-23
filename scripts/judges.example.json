@@ -1,0 +1,36 @@
+{
+  "judges": [
+    {
+      "name": "claude",
+      "kind": "anthropic",
+      "model": "claude-opus-5-5",
+      "effort": "high",
+      "batch": false,
+      "key_env": "JUDGE_ANTHROPIC_API_KEY"
+    },
+    {
+      "name": "openai",
+      "kind": "openai_compatible",
+      "base_url": "https://api.openai.com/v1",
+      "model": "gpt-6.1-sol",
+      "key_env": "JUDGE_OPENAI_API_KEY",
+      "timeout_seconds": 1800,
+      "extra": {
+        "response_format": {
+          "type": "json_object"
+        },
+        "service_tier": "flex"
+      }
+    },
+    {
+      "name": "gemini",
+      "kind": "openai_compatible",
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "model": "gemini-4-carbon",
+      "key_env": "JUDGE_GEMINI_API_KEY",
+      "extra": {
+        "max_tokens": 65536
+      }
+    }
+  ]
+}

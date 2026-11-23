@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "concept-pipeline"
+version = "0.1.0"
+description = "Concept-graph pipeline stages 2-6 for Hebrew-English course material (candidates, merging, importance, selection)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+# hebmath is installed from the same repository (extractor/); the pin keeps output stable.
+dependencies = [
+    "hebmath==1.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

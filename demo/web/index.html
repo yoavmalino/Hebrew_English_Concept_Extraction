@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Concept Extraction Explorer</title>
+    <meta
+      name="description"
+      content="Step through a Hebrew-English concept extraction pipeline: extraction, candidates, merging, importance and selection."
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>Concept Extraction Explorer</h1>
+      <p class="lede">
+        Hebrew-English course summaries in, a short list of the concepts worth learning out. Pick
+        an example and step through each stage of the pipeline.
+      </p>
+      <p class="note">
+        Algorithmic mode only: no language model is called, and the corpus-specificity signal T
+        is off. The examples are synthetic summaries written for testing.
+        <a href="https://github.com/yoavmalino/hebrew-english-concept-extraction">Source code</a>
+      </p>
+    </header>
+
+    <main>
+      <section class="picker" aria-label="Choose a document">
+        <div id="examples" class="examples" role="group" aria-label="Examples"></div>
+        <form id="upload" class="upload" hidden>
+          <label for="file">Or analyze your own PDF or DOCX (up to 10 MB):</label>
+          <input id="file" type="file" accept=".pdf,.docx" />
+          <button type="submit">Analyze</button>
+          <p class="note">
+            The file is processed in memory and dropped. Nothing is stored or logged.
+          </p>
+        </form>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <nav id="tabs" class="tabs" role="tablist" aria-label="Pipeline stages"></nav>
+      <section id="stage" class="stage" role="tabpanel"></section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

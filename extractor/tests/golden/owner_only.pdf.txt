@@ -1,0 +1,9 @@
+Let
+$\alpha,\beta\in\mathbb{R}$
+and consider
+
+$$\int_{a}^{b}e^{-x^{2}}dx\le\sqrt[3]{\frac{\pi}{2}}+\hat{x}_{i}^{2}$$
+
+Then
+$\bar{z}=\sum_{k=1}^{n}\frac{1}{k^{2}}$
+holds.
