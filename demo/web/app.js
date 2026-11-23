@@ -715,9 +715,15 @@
     uploadButton.setAttribute("aria-disabled", "true");
     const stopProgress = startProgress(file.name);
     try {
+      // Only the extension is sent: the server needs nothing else, and a header can carry only
+      // Latin-1, so a Hebrew file name would make the browser refuse the request.
+      const extension = file.name.split(".").pop().toLowerCase();
       const response = await fetch(`${config.apiUrl}/analyze`, {
         method: "POST",
-        headers: { "Content-Type": "application/octet-stream", "X-Filename": file.name },
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "X-Filename": `upload.${extension}`,
+        },
         body: file,
         signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
       });
