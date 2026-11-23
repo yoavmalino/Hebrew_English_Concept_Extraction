@@ -3,5 +3,5 @@
  * show the precomputed examples only and hide the upload form.
  */
 window.DEMO_CONFIG = {
-  apiUrl: "",
+  apiUrl: "https://concept-extraction-demo.onrender.com",
 };

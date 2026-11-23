@@ -342,7 +342,8 @@
         // keeps one edge as it does in the original.
         const isHebrew = data.stage2.language === "he";
         const fullText = el("div", null, isHebrew ? "fulltext rtl-doc" : "fulltext");
-        for (const line of s.text.split("\n")) {
+        // `excerpt` is what servers before the full-text change returned.
+        for (const line of (s.text ?? s.excerpt ?? "").split("\n")) {
           const lineNode = el("div", line || " ", "line");
           lineNode.dir = "auto";
           fullText.append(lineNode);
