@@ -4,7 +4,8 @@ Turns a course summary into the list of concepts a student needs to learn from i
 
 The input is a PDF or DOCX written in Hebrew, usually mixed with English terms and math. The
 output is up to 150 concepts, ranked by importance, each with the passage from the document that
-best introduces it.
+best introduces it. Linking the concepts into a map is not built yet (see
+[Limitations](#limitations-and-known-issues)).
 
 **[Try the live demo](https://yoavmalino.github.io/Hebrew_English_Concept_Extraction/)**: step
 through every stage on sample documents, or upload your own file.
@@ -143,9 +144,11 @@ committee), `scripts/stage2_*` and `scripts/stage4_*` (stage reports; they call 
 
 **Scope**
 
-- This is one part of a larger, private project: an adaptive learning platform that builds a
-  personal concept map from a student's course material and practices it with them. The later
-  steps (linking concepts into a graph, questions and practice) are not in this repository.
+- **Linking the concepts to each other is not built yet.** The output is a ranked list of
+  concepts, not a concept map: relations between concepts (prerequisite, part of, example of)
+  are planned and do not exist in any form, here or elsewhere.
+- This extraction is one part of a larger, private project: an adaptive learning platform that
+  will build a personal concept map from a student's course material and practice it with them.
 - Stage 3 (images and diagrams) is not implemented. Text inside images is ignored.
 
 **Extraction: not every PDF converts correctly**
@@ -195,9 +198,10 @@ ruff check . && ruff format --check .
 
 **Libraries in the product**
 
-- [pypdfium2](https://github.com/pypdfium2-team/pypdfium2) and Google's
-  [PDFium](https://pdfium.googlesource.com/pdfium/) (Apache-2.0 / BSD-3-Clause): the PDF engine
-  and the extractor's only runtime dependency. PDFium bundles FreeType, libjpeg-turbo, libpng,
+- [pypdfium2](https://github.com/pypdfium2-team/pypdfium2) (Apache-2.0 or BSD-3-Clause, used
+  under BSD-3-Clause) and [PDFium](https://pdfium.googlesource.com/pdfium/) (BSD-3-Clause): the
+  PDF engine and the extractor's only runtime dependency. Installed by pip, not copied into this
+  repository; their authors do not endorse this project. PDFium bundles FreeType, libjpeg-turbo, libpng,
   zlib, OpenJPEG, LittleCMS, libtiff, ICU and others. Portions of this software are copyright ©
   The FreeType Project (www.freetype.org). All rights reserved. This software is based in part on
   the work of the Independent JPEG Group.
@@ -224,8 +228,6 @@ ruff check . && ruff format --check .
   [fontTools](https://github.com/fonttools/fonttools) (MIT, builds the glyph atlas),
   [HTTPX](https://www.python-httpx.org) (BSD-3-Clause) and the
   [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python) (MIT).
-- Models: Claude Opus 5.5, GPT-6.1 Sol and Gemini 4 Carbon as the labelling committee; Claude
-  Haiku 5.5 for model mode.
 - The bidirectional reordering follows the Unicode Standard Annex #9 (UAX #9).
 
 Exact versions, licenses and obligations: [extractor/THIRD_PARTY_NOTICES.md](extractor/THIRD_PARTY_NOTICES.md).
