@@ -40,7 +40,10 @@
         <form id="upload" class="upload" hidden>
           <label for="file" class="upload-button">Choose a PDF or DOCX</label>
           <input id="file" class="visually-hidden" type="file" accept=".pdf,.docx" />
-          <p class="note">Up to 10 MB / 150 pages. Results in about 5–30 seconds.</p>
+          <p class="note">
+            Up to 10 MB / 150 pages. Roughly 2 seconds per page (10 pages ≈ 20 s, 80 pages ≈
+            2–3 min), plus up to a minute if the free server is asleep.
+          </p>
           <p class="note">
             <strong>Private:</strong> analyzed in memory, then discarded. Never stored or logged.
           </p>
@@ -59,6 +62,23 @@
       <nav id="tabs" class="tabs" role="tablist" aria-label="Pipeline stages" hidden></nav>
       <section id="stage" class="stage" role="tabpanel" hidden></section>
     </main>
+
+    <footer class="page-footer">
+      <p class="note">
+        Built with
+        <a href="https://github.com/pypdfium2-team/pypdfium2">pypdfium2</a> /
+        <a href="https://pdfium.googlesource.com/pdfium/">PDFium</a>,
+        <a href="https://fastapi.tiangolo.com">FastAPI</a>,
+        <a href="https://github.com/mozilla/pdf.js">pdf.js</a>,
+        <a href="https://github.com/VolodymyrBaydalka/docxjs">docx-preview</a> and
+        <a href="https://stuk.github.io/jszip/">JSZip</a>. Portions copyright © The FreeType
+        Project; based in part on the work of the Independent JPEG Group.
+        <a
+          href="https://github.com/yoavmalino/Hebrew_English_Concept_Extraction#credits"
+          >All credits and licenses</a
+        >.
+      </p>
+    </footer>
 
     <script src="config.js"></script>
     <script src="app.js"></script>

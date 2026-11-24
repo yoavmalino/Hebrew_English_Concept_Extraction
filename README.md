@@ -1,83 +1,81 @@
 # Hebrew-English Concept Extraction
 
-Give it a course summary (PDF or DOCX) written in Hebrew, often mixed with English terms and
-math. You get back the concepts a student needs to learn from it: about 150 of them, ranked, each
-with a passage from the document that defines or uses it.
+Turns a course summary into the list of concepts a student needs to learn from it.
 
-**Demo:** [yoavmalino.github.io/Hebrew_English_Concept_Extraction](https://yoavmalino.github.io/Hebrew_English_Concept_Extraction/)
-walks through every stage on four sample documents.
+The input is a PDF or DOCX written in Hebrew, usually mixed with English terms and math. The
+output is up to 150 concepts, ranked by importance, each with the passage from the document that
+best introduces it.
 
-## What makes it different
+**[Try the live demo](https://yoavmalino.github.io/Hebrew_English_Concept_Extraction/)**: step
+through every stage on sample documents, or upload your own file.
 
-- **Hebrew and math read correctly from PDF.** Hebrew PDFs store text in visual order, and
-  formulas are scattered glyphs and lines. The extractor rebuilds reading order with its own
-  implementation of the Unicode bidi algorithm, and rebuilds fractions, roots, sums, limits and
-  matrices from glyph geometry. Every formula comes out as LaTeX (KaTeX/MathJax compatible).
-- **No machine learning for extraction.** Every step is geometric or rule-based, so the output is
-  deterministic: the same file gives byte-identical output across runs and processes.
-- **Fonts with no Unicode mapping are still read.** Some PDF printers embed fonts whose text
-  layer is garbage. Instead of sending the page to OCR, which would lose all math structure,
-  each glyph is rendered and matched by shape against an atlas of about 2,900 reference glyphs.
-- **Structure, not just text.** Headings, units (definition, theorem, example), bold and
-  underline are kept, because they are the strongest evidence of what matters.
-- **Built for Hebrew morphology and mixed languages.** Attached prefixes (ה, ו, ב, ל, מ, ש,
-  כ) are stripped by a cautious rule, so "הגרף" and "בגרף" count as one term. In model mode,
-  plurals and construct forms are reduced to base forms too, and a term written in both
-  Hebrew and English ("אנטרופיה (entropy)") becomes one concept.
-- **Works without a model or an API key.** A model can be added at three points to improve
-  results, but the default mode is purely algorithmic.
-- **Permissively licensed stack only.** The only runtime dependency is pypdfium2. PyMuPDF
-  (AGPL), lxml wheels (bundle LGPL libiconv) and python-bidi (LGPL) were rejected on purpose.
-  See [extractor/README.md](extractor/README.md#licensing).
-- **Evaluated honestly.** Gold concept lists come from a committee of three models voting 2 of
-  3, checked against human judgement. Courses are split into dev (all tuning) and held-out
-  (measured once at the end).
+## Why this is hard, and what this project does about it
+
+- **Hebrew PDFs store text in visual order.** Copying text out of one gives reversed words and
+  scrambled formulas. The extractor rebuilds the reading order with its own implementation of the
+  Unicode bidirectional algorithm.
+- **Formulas are scattered glyphs and lines.** Fractions, roots, sums, limits and matrices are
+  rebuilt from glyph positions and drawn lines, and come out as LaTeX.
+- **Some PDFs have no usable text layer.** Some PDF printers embed fonts with no character
+  mapping. Instead of OCR, which would lose all math structure, each glyph is matched by shape
+  against an atlas of about 2,900 reference glyphs.
+- **Hebrew morphology.** One word appears as "גרף", "הגרף", "בגרף". Attached prefixes are
+  stripped by a cautious rule, so these count as one term.
+- **Two languages for one idea.** A term written as "אנטרופיה (entropy)", an acronym and its
+  expansion, or two spellings of one word are recognized as candidates for the same concept.
+- **No model needed.** Extraction is geometric and rule-based, so the same file always gives
+  byte-identical output. A language model can be added at three points (see below), but the
+  default runs with no API key.
 
 ## How it works
 
-| Stage | Module | What it does |
-|---|---|---|
-| 1. Extraction | `hebmath` (`extractor/`) | PDF/DOCX to text in reading order, formulas as LaTeX, plus headings, units and emphasis |
-| 2. Candidates | `stage2_candidates.py` | Every term that may be a concept, from 7 sources: definitions, headings, emphasis, glosses in parentheses, labels, LaTeX operators and repeated phrases |
-| 3. Image segments | – | Not implemented |
-| 4. Merging | `stage4_*.py` | Finds pairs that may be one concept (spelling variants, acronyms, translations, a term and its gloss) and groups them |
-| 5. Importance | `stage5_importance.py` | A score from 0 to 1 from 8 signals: is it defined or named, how it is marked, where it appears, how specific it is |
-| 6. Selection | `stage6_selection.py` | Picks the final nodes: a concept enters if it is important or covers something no chosen concept covers yet |
+Six stages. Each takes the previous stage's output; stages 2-6 are pure functions with no
+database and no network.
 
-Stages 2 to 6 are the package `concept_pipeline` (`pipeline/`), with no database and no network:
-model calls go through a sender function you pass in.
+1. **Extraction** (`extractor/`, package `hebmath`). Reads every glyph's position, size and font
+   from the PDF (or the XML of a DOCX), groups glyphs into lines by baseline, builds math
+   structures from geometry, turns visual order into logical order, and joins lines into
+   paragraphs. It also records the structure later stages use: headings, units such as
+   definitions and examples, and which words are bold, underlined, larger or on their own line.
+2. **Candidates.** Collects every phrase that might be a concept, from seven sources:
+   definitions ("X is called…"), headings, emphasized words, English glosses in parentheses,
+   label lines, math operators, and phrases of up to four words repeated in the text. Recall comes
+   first: a concept lost here never comes back, so most candidates are noise at this point.
+3. **Images.** In development: extracting and tagging concept candidates from images and
+   diagrams. For now the pipeline goes straight from stage 2 to stage 4.
+4. **Merging.** Finds pairs of candidates that may name one concept: a term and its English
+   gloss, an acronym and its expansion, spelling variants, one-letter typos, a named theorem and
+   its bare name. Pairs a rule can decide safely are merged; in model mode a model decides the
+   rest. Grouping is deterministic.
+5. **Importance.** Scores each concept from 0 to 1 using eight signals: is it defined or a named
+   result, how widely it is spread, how specific it is to this course compared with others, is it
+   tied to formulas, is it bold, underlined, in a larger font or on its own line. The weights were
+   fitted on real course summaries. A signal that marks too much of a document (for example,
+   everything bold) passes its weight to the others.
+6. **Selection.** Picks the final list, up to 150. Defined terms, named results and heading topics
+   enter first; the rest enter greedily while they add importance. Each concept keeps the passage
+   that best introduces it.
 
 ### Algorithmic mode and model mode
 
-**Algorithmic mode** (the default) needs nothing but the code. Stage 4 merges only what its
-rules can decide; every other pair stays as two concepts, the safe side.
+The default **algorithmic mode** needs only the code. Stage 4 merges only what its rules can
+decide; every other pair stays apart, the safe side. This is what the demo runs.
 
-**Model mode** adds three kinds of calls to an LLM:
+**Model mode** adds three kinds of LLM calls: base forms of Hebrew words (stage 2), finders for
+translations and synonyms no rule can see, and a decider for each proposed pair, by majority of
+three runs (stage 4). Every call goes through `llm_cache.py`, which records answers and replays
+them, so a rerun sends nothing.
 
-- base forms of Hebrew words in stage 2 (`stage2_model_normalizer.py`);
-- finders for translations and synonyms no rule can see (`stage4_translation_finder.py`,
-  `stage4_synonym_finder.py`);
-- a decider that judges each proposed pair, by majority of three runs (`stage4_merge_decider.py`).
+Stage 5's specificity signal compares a term's frequency with other courses. With no other
+courses to compare against (as in the demo), it is off.
 
-Every call goes through `llm_cache.py`, which records answers by content and replays them, so a
-rerun sends nothing. The prompts live in those modules.
-
-Stage 5 has one more signal, T, which compares a term's frequency with a background of other
-courses. Without a background (`background=None`) it is off.
-
-## Install
+## Install and use
 
 Python 3.11 or later (the extractor alone runs on 3.10).
 
 ```bash
 pip install ./extractor ./pipeline
 ```
-
-OCR of scanned pages needs [Tesseract](https://github.com/tesseract-ocr/tesseract) with the
-Hebrew model. Without it, scanned pages are reported as unreadable and the rest of the document
-is still read.
-
-## Usage
 
 ```python
 from hebmath import Extractor, ExtractorConfig
@@ -97,25 +95,27 @@ importance = s5.file_importance(evidence)
 selection = s6.select_nodes(s6.space_concepts([evidence], importance))
 ```
 
-The extractor also has a command line: `hebmath summary.pdf -o summary.txt --report report.json`.
-Its output format is specified in [extractor/docs/FORMAT.md](extractor/docs/FORMAT.md).
+The extractor also works on its own, from the command line:
+`hebmath summary.pdf -o summary.txt --report report.json`. Its output format is specified in
+[extractor/docs/FORMAT.md](extractor/docs/FORMAT.md), and its design, licensing choices and
+edge cases are in [extractor/README.md](extractor/README.md).
+
+Scanned pages need [Tesseract](https://github.com/tesseract-ocr/tesseract) with the Hebrew
+model. Without it, scanned pages are marked unreadable and the rest of the document is still
+read.
 
 ## Demo
 
-- **`demo/web`**: a static page, deployed to GitHub Pages by `.github/workflows/pages.yml`. It
-  shows each stage for four generated course summaries (written by a model for testing, not real
-  course material), with the original document beside the full extracted text.
-  `demo/build_examples.py` rebuilds its data and copies the originals to `demo/web/originals/`.
-  The originals are drawn in the browser by [pdf.js](https://github.com/mozilla/pdf.js) and
-  [docx-preview](https://github.com/VolodymyrBaydalka/docxjs) (both Apache-2.0), loaded from a
-  CDN at pinned versions only when a document is shown.
-- **`demo/api`**: an optional FastAPI service with one endpoint, `POST /analyze`, that runs the
-  same analysis on an uploaded file of up to 10 MB. The file is held in memory for the call
-  only; nothing is stored and requests are not logged. `render.yaml` deploys it to Render's free
-  tier in one step. Put its address in `demo/web/config.js` to turn on the upload form; with no
-  address the page shows only the examples.
+- **`demo/web`**: a static page on GitHub Pages. It shows every stage for four sample documents,
+  with the original beside the extracted text, and lets visitors upload their own file.
+- **`demo/api`**: a small FastAPI service with one endpoint, `POST /analyze`, hosted on Render's
+  free tier (`render.yaml`). The uploaded file is analyzed in memory and discarded; nothing is
+  stored and requests are not logged.
 
-Run both locally:
+The four samples are generated documents: course summaries written by a language model for
+testing, not real course material.
+
+Run it locally:
 
 ```bash
 pip install ./extractor ./pipeline -r demo/api/requirements.txt
@@ -126,6 +126,63 @@ cd demo/api && uvicorn app:app --port 8766
 python -m http.server 8765 --directory demo/web
 ```
 
+## Evaluation
+
+The gold concept lists come from a committee of three models (Claude Opus 5.5, GPT-6.1 Sol and
+Gemini 4 Carbon) that label each course blindly; a concept counts when two of three agree. The
+committee was checked against the author's own judgement on a sample. Courses are split into a
+development set, used for all tuning, and a held-out set, measured once at the end.
+
+The course files, labels and results are not in this repository, because they come from real
+course material. The tools that produced them are: `scripts/concept_committee.py` (the
+committee), `scripts/stage2_*` and `scripts/stage4_*` (stage reports; they call a model only with
+`--send`), and `calibration/` (the stage 5 and 6 settings, see
+[calibration/README.md](calibration/README.md)).
+
+## Limitations and known issues
+
+**Scope**
+
+- This is one part of a larger, private project: an adaptive learning platform that builds a
+  personal concept map from a student's course material and practices it with them. The later
+  steps (linking concepts into a graph, questions and practice) are not in this repository.
+- Stage 3 (images and diagrams) is not implemented. Text inside images is ignored.
+
+**Extraction: not every PDF converts correctly**
+
+- Scanned pages are not read on the demo server (no OCR there). Formulas on scanned pages are
+  read only when they are simple and linear, even with Tesseract installed.
+- In fonts with no character mapping, some Hebrew letters of similar shape are confused, most
+  often ש and ט.
+- Two-column layouts are not supported: lines from both columns merge.
+- Old equation objects in Word files (Equation Editor 3.0, MathType) are marked, not converted.
+- PDFs printed from Chrome with math on a right-to-left page can mirror some relation signs
+  (`<` and `>`).
+- The full list is in [extractor/README.md](extractor/README.md#known-limitations).
+
+**Concept quality**
+
+- The selection always fills its list, so a document with few real concepts still gets many, and
+  frequent generic words ("טבלה", "עובד") can rank too high.
+- Without a model, synonyms with no shared form (two Hebrew words for one idea, an acronym that
+  does not spell its expansion) stay as separate concepts.
+- The gold labels come from models checked on a sample, so measured precision is a lower bound:
+  a valid concept the committee did not list counts as noise.
+
+**Demo**
+
+- The free server is slow, roughly 2 seconds per page, and sleeps when idle: the first upload
+  after a quiet period waits up to a minute longer.
+- Files are limited to 10 MB and 150 pages.
+
+**Development**
+
+- The extractor's golden test files are a Linux reference (as in CI), so two of those tests fail
+  on macOS.
+- The code was developed inside the private project and moved here without its history.
+  Docstrings that mention "the design", "the plan" or "owner decisions" refer to design
+  documents that are not included.
+
 ## Development
 
 ```bash
@@ -134,29 +191,45 @@ pytest
 ruff check . && ruff format --check .
 ```
 
-The extractor's golden files are a Linux reference (as in CI), so two of those tests fail on
-macOS.
+## Credits
 
-## Data, calibration and evaluation
+**Libraries in the product**
 
-The course files, gold labels, recorded model answers and per-course results are not in this
-repository, because they come from real course material. The tools that produced them are:
+- [pypdfium2](https://github.com/pypdfium2-team/pypdfium2) and Google's
+  [PDFium](https://pdfium.googlesource.com/pdfium/) (Apache-2.0 / BSD-3-Clause): the PDF engine
+  and the extractor's only runtime dependency. PDFium bundles FreeType, libjpeg-turbo, libpng,
+  zlib, OpenJPEG, LittleCMS, libtiff, ICU and others. Portions of this software are copyright ©
+  The FreeType Project (www.freetype.org). All rights reserved. This software is based in part on
+  the work of the Independent JPEG Group.
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (Apache-2.0), optional, for
+  scanned pages.
+- The glyph atlas is built from fonts under the SIL Open Font License: STIX Two Math, Libertinus
+  Math, Noto Sans Math, Tinos, Arimo, David Libre, Frank Ruhl Libre, Miriam Libre, Alef, Noto Serif
+  Hebrew and Noto Sans Hebrew. Only shape descriptors are shipped, no font files.
 
-- `scripts/concept_committee.py` builds a course's gold concept list from three models that
-  label blindly and vote. `scripts/judges.example.json` names the models and the environment
-  variables that hold their keys.
-- `scripts/stage2_*` and `scripts/stage4_*` report and measure stages 2 and 4. They call a model
-  only with `--send`; the stage-4 evaluation also keeps a spending ledger with a budget limit.
-- `calibration/` chose the stage-5 weights and stage-6 settings now in the package. Point
-  `--data-dir` or `TACTIMIND_DATA_DIR` at a data folder; see
-  [calibration/README.md](calibration/README.md).
+**Demo**
 
-This code was developed inside a private monorepo and moved here without its history.
-Docstrings that mention "the design", "the plan" or "owner decisions" refer to private design
-documents that are not included.
+- [FastAPI](https://fastapi.tiangolo.com) (MIT) and [Uvicorn](https://www.uvicorn.org)
+  (BSD-3-Clause): the demo server.
+- [pdf.js](https://github.com/mozilla/pdf.js) (Apache-2.0),
+  [docx-preview](https://github.com/VolodymyrBaydalka/docxjs) (Apache-2.0) and
+  [JSZip](https://stuk.github.io/jszip/) (MIT or GPL-3.0, used under MIT): show the original
+  document and count its pages in the browser. Unmodified copies with their licenses are in
+  [demo/web/vendor](demo/web/vendor/README.md).
+- Hosted on [GitHub Pages](https://pages.github.com) and [Render](https://render.com).
+
+**Development and evaluation**
+
+- [pytest](https://pytest.org) (MIT), [Ruff](https://github.com/astral-sh/ruff) (MIT),
+  [fontTools](https://github.com/fonttools/fonttools) (MIT, builds the glyph atlas),
+  [HTTPX](https://www.python-httpx.org) (BSD-3-Clause) and the
+  [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python) (MIT).
+- Models: Claude Opus 5.5, GPT-6.1 Sol and Gemini 4 Carbon as the labelling committee; Claude
+  Haiku 5.5 for model mode.
+- The bidirectional reordering follows the Unicode Standard Annex #9 (UAX #9).
+
+Exact versions, licenses and obligations: [extractor/THIRD_PARTY_NOTICES.md](extractor/THIRD_PARTY_NOTICES.md).
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Third-party notices (PDFium, its
-bundled libraries and the fonts behind the glyph atlas) are in
-[extractor/THIRD_PARTY_NOTICES.md](extractor/THIRD_PARTY_NOTICES.md).
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

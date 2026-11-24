@@ -14,10 +14,21 @@
   const uploadButton = document.querySelector(".upload-button");
   // Matches the API's own limit (demo/api/analysis.py MAX_FILE_BYTES), checked here to fail fast.
   const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
-  // A cold start on the free host plus a long file stays well under this.
-  const UPLOAD_TIMEOUT_MS = 180000;
-  // After this long the wait is most likely the server waking up, so the hint says so.
-  const WAKE_HINT_SECONDS = 10;
+  // Time estimate on the free demo server, measured 2026-11-23 on the samples (7-10 pages,
+  // 9-14 s) and projected for a 78-page summary (about 2.2 s a page): a fixed start plus a
+  // per-page cost, shown as a range because fonts and formulas change the cost per page.
+  const ESTIMATE_BASE_SECONDS = 3;
+  const ESTIMATE_SECONDS_PER_PAGE = 1.8;
+  const ESTIMATE_LOW_FACTOR = 0.6;
+  const ESTIMATE_HIGH_FACTOR = 1.4;
+  // A sleeping free server takes up to about a minute to start before the analysis begins.
+  const WAKE_SECONDS = 60;
+  // The request is given up after the estimate's high end plus a wake-up and a margin, and
+  // never sooner than this.
+  const MIN_UPLOAD_TIMEOUT_MS = 180000;
+  const TIMEOUT_MARGIN_SECONDS = 60;
+  // Counting pages must never hold up the upload for long.
+  const PAGE_COUNT_TIMEOUT_MS = 5000;
   const tabsBox = document.getElementById("tabs");
   const stagePanel = document.getElementById("stage");
   const modeBox = document.getElementById("mode");
@@ -50,12 +61,15 @@
     named: "named result and its bare name",
   };
 
-  // Viewers for the original document, loaded only when stage 1 first shows one. Versions are
-  // pinned; pdf.js runs with eval off (an uploaded PDF must not run code).
-  const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
-  const PDFJS_WORKER_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-  const JSZIP_URL = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
-  const DOCX_PREVIEW_URL = "https://cdn.jsdelivr.net/npm/docx-preview@0.3.5/dist/docx-preview.min.js";
+  // Viewers for the original document, loaded only when first needed. They are served from this
+  // site (vendor/, versions and sources in vendor/README.md), not a CDN, so a blocked or failing
+  // CDN cannot leave the original empty. pdf.js runs with eval off (an uploaded PDF must not run
+  // code).
+  const vendorUrl = (path) => new URL(`vendor/${path}`, document.baseURI).href;
+  const PDFJS_URL = vendorUrl("pdfjs/pdf.mjs");
+  const PDFJS_WORKER_URL = vendorUrl("pdfjs/pdf.worker.mjs");
+  const JSZIP_URL = vendorUrl("jszip/jszip.min.js");
+  const DOCX_PREVIEW_URL = vendorUrl("docx-preview/docx-preview.min.js");
   // A long upload renders only its first pages, so a 150-page PDF does not freeze the tab.
   const MAX_ORIGINAL_PAGES = 40;
   // Canvas pixels per CSS pixel: sharp on high-density screens without huge canvases.
@@ -73,6 +87,7 @@
   const views = { examples: null, upload: null };
   let pdfjsPromise = null;
   let docxPromise = null;
+  let jszipPromise = null;
 
   /**
    * Create an element with optional text and class.
@@ -203,11 +218,90 @@
    */
   function loadDocxPreview() {
     if (!docxPromise) {
-      docxPromise = loadScript(JSZIP_URL)
+      docxPromise = loadJsZip()
         .then(() => loadScript(DOCX_PREVIEW_URL))
         .then(() => window.docx);
     }
     return docxPromise;
+  }
+
+  /**
+   * Return the JSZip library, loading it on first use.
+   *
+   * @returns {Promise<object>}
+   */
+  function loadJsZip() {
+    if (!jszipPromise) jszipPromise = loadScript(JSZIP_URL).then(() => window.JSZip);
+    return jszipPromise;
+  }
+
+  /**
+   * Return the number of pages of a PDF or DOCX, or null when it cannot be read quickly.
+   *
+   * A PDF is counted by pdf.js; a DOCX by the page count Word saves in docProps/app.xml (absent
+   * from files some converters write).
+   *
+   * @param {File} file
+   * @returns {Promise<?number>}
+   */
+  async function countPages(file) {
+    const count = async () => {
+      const bytes = await file.arrayBuffer();
+      if (/\.pdf$/i.test(file.name)) {
+        const pdfjs = await loadPdfjs();
+        const pdf = await pdfjs.getDocument({ data: bytes, isEvalSupported: false }).promise;
+        const pages = pdf.numPages;
+        pdf.destroy();
+        return pages;
+      }
+      const JSZip = await loadJsZip();
+      const zip = await JSZip.loadAsync(bytes);
+      const app = zip.file("docProps/app.xml");
+      const match = app && (await app.async("string")).match(/<Pages>(\d+)<\/Pages>/);
+      return match ? Number(match[1]) : null;
+    };
+    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), PAGE_COUNT_TIMEOUT_MS));
+    try {
+      return await Promise.race([count(), timeout]);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  /**
+   * Return the estimated analysis time in seconds for a page count, as a [low, high] range.
+   *
+   * @param {number} pages
+   * @returns {[number, number]}
+   */
+  function estimateSeconds(pages) {
+    const middle = ESTIMATE_BASE_SECONDS + ESTIMATE_SECONDS_PER_PAGE * pages;
+    return [
+      Math.max(3, Math.round(middle * ESTIMATE_LOW_FACTOR)),
+      Math.round(middle * ESTIMATE_HIGH_FACTOR),
+    ];
+  }
+
+  /**
+   * Format a number of seconds as "40 s" or "2 min".
+   *
+   * @param {number} seconds
+   * @returns {string}
+   */
+  function formatDuration(seconds) {
+    return seconds < 90 ? `${seconds} s` : `${Math.round(seconds / 60)} min`;
+  }
+
+  /**
+   * Format an estimate range in one unit: "15–29 s", or "1–3 min" once the high end is long.
+   *
+   * @param {[number, number]} range low and high seconds
+   * @returns {string}
+   */
+  function formatRange([low, high]) {
+    if (high < 90) return `${low}–${high} s`;
+    return `${Math.max(1, Math.round(low / 60))}–${Math.round(high / 60)} min`;
   }
 
   /**
@@ -653,32 +747,46 @@
   }
 
   /**
-   * Show the progress box while an upload is analyzed, with elapsed time and a hint that changes
-   * when the wait gets long (a free server sleeps when idle and takes up to a minute to wake).
+   * Show the progress box while an upload is analyzed: elapsed time, the estimate for the file's
+   * page count, and a wake-up note once the wait passes the estimate (a free server sleeps when
+   * idle and takes up to a minute to start).
    *
    * @param {string} fileName
-   * @returns {function(): void} stops the timer and hides the box
+   * @returns {{setPages: function(?number): void, stop: function(): void}} `setPages` adds the
+   *     estimate once the page count is known; `stop` ends the timer and hides the box
    */
   function startProgress(fileName) {
     const title = document.getElementById("progress-title");
     const detail = document.getElementById("progress-detail");
     const started = Date.now();
+    let pages = null;
+    let estimate = null;
     title.textContent = `Analyzing ${fileName}…`;
     const tick = () => {
       const seconds = Math.round((Date.now() - started) / 1000);
-      const hint =
-        seconds >= WAKE_HINT_SECONDS
-          ? "Waking the free demo server. Up to a minute; keep this page open."
-          : "Reading the document and finding its concepts.";
-      detail.textContent = `${seconds} s · ${hint}`;
+      const expected = estimate
+        ? `Estimated ${formatRange(estimate)} for ${pages} page${pages === 1 ? "" : "s"}.`
+        : "Reading the document and finding its concepts.";
+      const overdue = seconds > (estimate ? estimate[1] : 15);
+      const hint = overdue
+        ? "Taking longer: the free demo server may be waking up (up to a minute). Keep this page open."
+        : expected;
+      detail.textContent = `${formatDuration(seconds)} elapsed · ${hint}`;
     };
     tick();
     const timer = setInterval(tick, 1000);
     progressBox.hidden = false;
     progressBox.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    return () => {
-      clearInterval(timer);
-      progressBox.hidden = true;
+    return {
+      setPages(count) {
+        pages = count;
+        estimate = count ? estimateSeconds(count) : null;
+        tick();
+      },
+      stop() {
+        clearInterval(timer);
+        progressBox.hidden = true;
+      },
     };
   }
 
@@ -713,8 +821,15 @@
     setStatus("");
     input.disabled = true;
     uploadButton.setAttribute("aria-disabled", "true");
-    const stopProgress = startProgress(file.name);
+    const progress = startProgress(file.name);
     try {
+      const pages = await countPages(file);
+      progress.setPages(pages);
+      const highSeconds = pages ? estimateSeconds(pages)[1] : 0;
+      const timeoutMs = Math.max(
+        MIN_UPLOAD_TIMEOUT_MS,
+        (highSeconds + WAKE_SECONDS + TIMEOUT_MARGIN_SECONDS) * 1000,
+      );
       // Only the extension is sent: the server needs nothing else, and a header can carry only
       // Latin-1, so a Hebrew file name would make the browser refuse the request.
       const extension = file.name.split(".").pop().toLowerCase();
@@ -725,7 +840,7 @@
           "X-Filename": `upload.${extension}`,
         },
         body: file,
-        signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -754,7 +869,7 @@
         true,
       );
     } finally {
-      stopProgress();
+      progress.stop();
       input.disabled = false;
       input.value = "";
       uploadButton.removeAttribute("aria-disabled");
