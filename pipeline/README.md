@@ -16,4 +16,5 @@ concepts worth learning, ranked, each with the passages that define or use it.
 | `gold.py`, `stage4_merge_eval.py`, `stage6_selection_eval.py` | Evaluation against gold labels |
 
 No database and no network: model calls go through a sender function you pass in. The only
-module that touches files is `llm_cache.py`, which keeps its folder of recorded answers. See the repository README for installation, usage and the algorithmic and model modes.
+module that touches files is `llm_cache.py`, which keeps its folder of recorded answers. See
+[docs/USAGE.md](../docs/USAGE.md) for installation, usage and the algorithmic and model modes.

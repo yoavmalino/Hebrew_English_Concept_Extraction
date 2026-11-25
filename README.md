@@ -1,237 +1,231 @@
 # Hebrew-English Concept Extraction
 
-Turns a course summary into the list of concepts a student needs to learn from it.
+Turns a course summary in Hebrew, English or a mix of the two into the list of concepts a student
+needs to learn from it.
 
-The input is a PDF or DOCX written in Hebrew, usually mixed with English terms and math. The
-output is up to 150 concepts, ranked by importance, each with the passage from the document that
-best introduces it. Linking the concepts into a map is not built yet (see
-[Limitations](#limitations-and-known-issues)).
+I started this project in mid-September 2026 as an intermediate step in a larger project: a
+generator of concept maps and learning flows (a directed acyclic graph of the material's
+hierarchy). It is in active development, and you can follow my progress in the
+[live demo](https://yoavmalino.github.io/Hebrew_English_Concept_Extraction/).
 
-**[Try the live demo](https://yoavmalino.github.io/Hebrew_English_Concept_Extraction/)**: step
-through every stage on sample documents, or upload your own file.
+**<ins>This repository is the first part, and it runs end to end: from a PDF or DOCX to a list of up
+to 150 concepts, each with the passage that introduces it.</ins>** The two graphs are the next part.
 
-## Why this is hard, and what this project does about it
+A few concepts from the demo's operating systems document, as the pipeline returned them:
 
-- **Hebrew PDFs store text in visual order.** Copying text out of one gives reversed words and
-  scrambled formulas. The extractor rebuilds the reading order with its own implementation of the
-  Unicode bidirectional algorithm.
-- **Formulas are scattered glyphs and lines.** Fractions, roots, sums, limits and matrices are
-  rebuilt from glyph positions and drawn lines, and come out as LaTeX.
-- **Some PDFs have no usable text layer.** Some PDF printers embed fonts with no character
-  mapping. Instead of OCR, which would lose all math structure, each glyph is matched by shape
-  against an atlas of about 2,900 reference glyphs.
-- **Hebrew morphology.** One word appears as "גרף", "הגרף", "בגרף". Attached prefixes are
-  stripped by a cautious rule, so these count as one term.
-- **Two languages for one idea.** A term written as "אנטרופיה (entropy)", an acronym and its
-  expansion, or two spellings of one word are recognized as candidates for the same concept.
-- **No model needed.** Extraction is geometric and rule-based, so the same file always gives
-  byte-identical output. A language model can be added at three points (see below), but the
-  default runs with no API key.
+| Concept | The passage it comes with |
+|---|---|
+| מבוי סתום | מבוי סתום הוא מצב שבו קבוצה של תהליכים נמצאת בהמתנה מעגלית, כשכל תהליך בקבוצה ממתין למשאב שמוחזק על ידי תהליך אחר בקבוצה. |
+| תקלת דפים | תקלת דפים (page fault) מתרחשת כשתהליך ניגש לדף שאינו נמצא כרגע בזיכרון הפיזי. |
+| aging | הפתרון הנפוץ נקרא aging, שבו העדיפות של תהליך ממתין עולה בהדרגה עם הזמן. |
+| tlb | כדי למנוע זאת, המעבד מחזיק מטמון קטן של תרגומים שנקרא TLB (Translation Lookaside Buffer). |
+
+The document was generated for testing; it is not real course material.
+
+## Motivation
+
+During my first and second years at the Technion, I struggled to connect the dots between
+lectures. I started reading research and even took a paid online course on effective studying.
+Testing different study tips taught me one thing: for a concept to stick, and to see the big
+picture, I need to understand the structure of the material and build a bridge between the
+concepts I already know and the new ones I'm learning.
+
+I used to build concept maps by hand. I skimmed the lecture and wrote down every key concept:
+concepts that kept coming back, concepts that appeared in headings, or any term that seemed to be
+a concept. Then I split them into groups by context, and only then built the map.
+
+I saw value in building the map myself. But the more I did it, the more I understood that most of
+the value comes from understanding the hierarchy of the material, and from asking myself why
+"concept A" is connected to "concept B" by a relationship of type X. With dense academic material,
+building a map by hand can take a very long time. At some point the cost outgrows the benefit, and
+it stops being practical to do for every course.
+
+So I'm trying to build a system that takes PDF or DOCX files of dense academic material and builds
+two graphs:
+
+1. **A directed acyclic graph of the hierarchy of the material**: which concepts you need to
+   understand before you can understand others.
+2. **A directed graph of the relations between concepts**: a concept can have more than one type
+   of connection, with many different concepts.
+
+To benefit from such a system, learners still need to make the effort to understand the
+connections between concepts. The goal is to focus the effort they already invest in lectures and
+homework, not to add another task. The map lets them follow the flow of a lecture and see how each
+concept builds on the previous ones.
+
+It also aims to help them find their gap: **what lies between the last concept they understood and
+the point where they lost the lecturer.**
+
+## What a good result looks like
+
+This stage is an intermediate step: its output is the set of building blocks for the concept map.
+Right now I'm focusing on one question: **which candidates are really concepts of the course, and
+which are noise?** Their order doesn't matter yet.
+
+### What counts as a concept
+
+A concept is an idea that belongs to the course's subject and has a meaning of its own there. In
+STEM courses, concepts are also working tools: students use them to solve problems and build proofs.
+
+### What a good filter does
+
+- **Keeps the concepts of the course**, especially the ones a student must know.
+- **Removes the noise:** general words, sentence fragments, and phrases that wrap a concept in extra
+  words, such as "proof of the Weierstrass theorem" instead of "Weierstrass theorem".
+- **Works in both Hebrew and English:** the same definition and the same quality bar apply to a
+  Hebrew document, an English document, and a document that mixes the two. So far the focus has been
+  on Hebrew documents with English terms.
+
+**A missing concept is worse than an extra one.** An extra concept adds noise, but a missing one may
+be the very node that connects the central concepts of the map.
+
+### Working targets
+
+I don't know yet what "good enough" is. These are working targets, and I expect to revise them as I
+learn what the map really needs. I want to measure them separately for Hebrew and English:
+
+| Goal | Metric | Working target |
+|---|---|---|
+| Keep the must-know concepts | Recall | 90% |
+| Remove the noise | Precision | 70% |
 
 ## How it works
 
-Six stages. Each takes the previous stage's output; stages 2-6 are pure functions with no
-database and no network.
+| Stage | What it does |
+|---|---|
+| 1. Extraction | Reads the PDF or DOCX in the right order, formulas included, and keeps the structure: headings, definitions, emphasis |
+| 2. Candidates | Collects every phrase that might be a concept. Most of them are noise at this point |
+| 3. Images | Not built yet. Meant to recover concepts that appear only in images and diagrams |
+| 4. Merging | Finds different names for the same concept |
+| 5. Importance | Scores each concept by signals such as definitions, headings, formulas and emphasis |
+| 6. Selection | Picks the final list, up to 150, each with the passage that introduces it |
 
-1. **Extraction** (`extractor/`, package `hebmath`). Reads every glyph's position, size and font
-   from the PDF (or the XML of a DOCX), groups glyphs into lines by baseline, builds math
-   structures from geometry, turns visual order into logical order, and joins lines into
-   paragraphs. It also records the structure later stages use: headings, units such as
-   definitions and examples, and which words are bold, underlined, larger or on their own line.
-2. **Candidates.** Collects every phrase that might be a concept, from seven sources:
-   definitions ("X is called…"), headings, emphasized words, English glosses in parentheses,
-   label lines, math operators, and phrases of up to four words repeated in the text. Recall comes
-   first: a concept lost here never comes back, so most candidates are noise at this point.
-3. **Images.** In development: extracting and tagging concept candidates from images and
-   diagrams. For now the pipeline goes straight from stage 2 to stage 4.
-4. **Merging.** Finds pairs of candidates that may name one concept: a term and its English
-   gloss, an acronym and its expansion, spelling variants, one-letter typos, a named theorem and
-   its bare name. Pairs a rule can decide safely are merged; in model mode a model decides the
-   rest. Grouping is deterministic.
-5. **Importance.** Scores each concept from 0 to 1 using eight signals: is it defined or a named
-   result, how widely it is spread, how specific it is to this course compared with others, is it
-   tied to formulas, is it bold, underlined, in a larger font or on its own line. The weights were
-   fitted on real course summaries. A signal that marks too much of a document (for example,
-   everything bold) passes its weight to the others.
-6. **Selection.** Picks the final list, up to 150. Defined terms, named results and heading topics
-   enter first; the rest enter greedily while they add importance. Each concept keeps the passage
-   that best introduces it.
+It runs without an LLM by default, and this is what the demo runs. A model can be added in stages 2
+and 4, and every answer it gives is recorded, so a rerun sends nothing.
 
-### Algorithmic mode and model mode
+## Key decisions and tradeoffs
 
-The default **algorithmic mode** needs only the code. Stage 4 merges only what its rules can
-decide; every other pair stays apart, the safe side. This is what the demo runs.
+- **Rebuild the text instead of copying it.** Hebrew PDFs store text in visual order, so copying it
+  gives reversed words and scrambled formulas. I rebuild the reading order with my own implementation
+  of the Unicode bidirectional algorithm, and formulas from the positions of glyphs and lines, as
+  LaTeX. The price: unusual layouts, such as two columns, are not supported.
+- **Glyph shapes instead of OCR** for PDFs with broken fonts. OCR would lose the structure of the
+  math, so each glyph is matched by shape against about 2,900 reference glyphs. The price: similar
+  Hebrew letters, such as ש and ט, are sometimes confused.
+- **Rules before LLMs.** The same file always gives the same result, with no cost and no API key. The
+  price: synonyms that share no form are not merged.
+- **Recall first.** A concept lost in stage 2 never comes back, so I collect widely and filter later.
+  The price: most candidates are noise.
+- **When in doubt, don't merge.** A wrong merge deletes a concept. The price: more duplicates.
 
-**Model mode** adds three kinds of LLM calls: base forms of Hebrew words (stage 2), finders for
-translations and synonyms no rule can see, and a decider for each proposed pair, by majority of
-three runs (stage 4). Every call goes through `llm_cache.py`, which records answers and replays
-them, so a rerun sends nothing.
+## Where the project stands, and what's next
 
-Stage 5's specificity signal compares a term's frequency with other courses. With no other
-courses to compare against (as in the demo), it is off.
+**What works well today**
 
-## Install and use
+- Extracting text and formulas from most Hebrew and mixed PDF and DOCX files.
+- Finding candidates in seven ways, without an LLM: definitions, headings, emphasized words,
+  translations in parentheses, label lines, math operators and repeated phrases.
 
-Python 3.11 or later (the extractor alone runs on 3.10).
+**Now:** separating concepts from noise. My first approach scored concepts with weights I tuned on a
+small set of courses, and it overfit, so I'm moving to a different approach.
+
+**Next:** reading text from images before candidates are collected, and merging more without an LLM.
+
+**Later:** understanding diagrams, and building the two graphs: the hierarchy of the material and the
+relations between concepts.
+
+I developed this inside a private project and moved it here in November 2026, so the commit history
+doesn't show the earlier work.
+
+## Evaluation
+
+To measure the filter, I need to know which concepts belong to each course. A committee of three
+models (Claude Opus 5.5, GPT-6.1 Sol and Gemini 4 Carbon) lists them without seeing what my pipeline
+found, and a concept counts when at least two agree. I checked the committee against my own judgement
+on a sample. Courses are split into a development set, used for all tuning, and a held-out set.
+
+## Limitations
+
+- **Not every PDF is read correctly.** It depends on how the file was made: broken fonts, unusual
+  layouts and complex formulas can come out wrong or go missing.
+- Text inside images is ignored, and so are scanned pages in the demo.
+- Two-column layouts are not supported.
+- Formulas on scanned pages are read only when they are simple and linear.
+- Old equation objects in Word files are marked, not converted.
+
+The full list for extraction is in [extractor/README.md](extractor/README.md#known-limitations).
+
+## Challenges and open questions
+
+- **How do I read every PDF?** Each program writes PDFs differently. A page can look right while its
+  text is stored in the wrong order, or in a font that doesn't say which letter each shape is. An
+  error here carries over to every later stage.
+- **Where does the list end?** Today it fills up to 150 entries, and I want a cutoff that depends on
+  the material. One direction is to add a concept only if it contributes enough to a graph centrality
+  measure, but the graph doesn't exist yet.
+- **What is "good enough"?** I won't know until I see what the map really needs.
+- **How far can merging go without an LLM?** "Context switch" and "החלפת הקשר" name the same idea
+  and share no letters.
+- **When should images be read?** Text inside an image should be counted with the rest of the
+  document, but OCR errors could become candidates.
+- **How much can I trust the labels?** They come from models, and a valid concept
+  they missed counts as noise, so they limit what I can measure.
+
+## Run it yourself
+
+Python 3.11 or later:
 
 ```bash
 pip install ./extractor ./pipeline
 ```
 
-```python
-from hebmath import Extractor, ExtractorConfig
-
-from concept_pipeline import stage5_importance as s5
-from concept_pipeline import stage6_selection as s6
-from concept_pipeline.stage2_candidates import extract_candidates
-from concept_pipeline.stage4_merging import absorb_fragments, decide_by_rule, find_pairs, merge
-
-result = Extractor(ExtractorConfig()).extract_bytes(data, filename="summary.pdf")
-stage2 = extract_candidates(result)
-pairs, _ = find_pairs(stage2.candidates)
-decisions, _undecided = decide_by_rule(pairs)
-concepts, _absorbed = absorb_fragments(merge(stage2, decisions))
-evidence = s5.file_evidence(result, concepts, background=None)
-importance = s5.file_importance(evidence)
-selection = s6.select_nodes(s6.space_concepts([evidence], importance))
-```
-
-The extractor also works on its own, from the command line:
-`hebmath summary.pdf -o summary.txt --report report.json`. Its output format is specified in
-[extractor/docs/FORMAT.md](extractor/docs/FORMAT.md), and its design, licensing choices and
-edge cases are in [extractor/README.md](extractor/README.md).
-
-Scanned pages need [Tesseract](https://github.com/tesseract-ocr/tesseract) with the Hebrew
-model. Without it, scanned pages are marked unreadable and the rest of the document is still
-read.
-
-## Demo
-
-- **`demo/web`**: a static page on GitHub Pages. It shows every stage for four sample documents,
-  with the original beside the extracted text, and lets visitors upload their own file.
-- **`demo/api`**: a small FastAPI service with one endpoint, `POST /analyze`, hosted on Render's
-  free tier (`render.yaml`). The uploaded file is analyzed in memory and discarded; nothing is
-  stored and requests are not logged.
-
-The four samples are generated documents: course summaries written by a language model for
-testing, not real course material.
-
-Run it locally:
-
-```bash
-pip install ./extractor ./pipeline -r demo/api/requirements.txt
-cd demo/api && uvicorn app:app --port 8766
-```
-
-```bash
-python -m http.server 8765 --directory demo/web
-```
-
-## Evaluation
-
-The gold concept lists come from a committee of three models (Claude Opus 5.5, GPT-6.1 Sol and
-Gemini 4 Carbon) that label each course blindly; a concept counts when two of three agree. The
-committee was checked against the author's own judgement on a sample. Courses are split into a
-development set, used for all tuning, and a held-out set, measured once at the end.
-
-The course files, labels and results are not in this repository, because they come from real
-course material. The tools that produced them are: `scripts/concept_committee.py` (the
-committee), `scripts/stage2_*` and `scripts/stage4_*` (stage reports; they call a model only with
-`--send`), and `calibration/` (the stage 5 and 6 settings, see
-[calibration/README.md](calibration/README.md)).
-
-## Limitations and known issues
-
-**Scope**
-
-- **Linking the concepts to each other is not built yet.** The output is a ranked list of
-  concepts, not a concept map: relations between concepts (prerequisite, part of, example of)
-  are planned and do not exist in any form, here or elsewhere.
-- This extraction is one part of a larger, private project: an adaptive learning platform that
-  will build a personal concept map from a student's course material and practice it with them.
-- Stage 3 (images and diagrams) is not implemented. Text inside images is ignored.
-
-**Extraction: not every PDF converts correctly**
-
-- Scanned pages are not read on the demo server (no OCR there). Formulas on scanned pages are
-  read only when they are simple and linear, even with Tesseract installed.
-- In fonts with no character mapping, some Hebrew letters of similar shape are confused, most
-  often ש and ט.
-- Two-column layouts are not supported: lines from both columns merge.
-- Old equation objects in Word files (Equation Editor 3.0, MathType) are marked, not converted.
-- PDFs printed from Chrome with math on a right-to-left page can mirror some relation signs
-  (`<` and `>`).
-- The full list is in [extractor/README.md](extractor/README.md#known-limitations).
-
-**Concept quality**
-
-- The selection always fills its list, so a document with few real concepts still gets many, and
-  frequent generic words ("טבלה", "עובד") can rank too high.
-- Without a model, synonyms with no shared form (two Hebrew words for one idea, an acronym that
-  does not spell its expansion) stay as separate concepts.
-- The gold labels come from models checked on a sample, so measured precision is a lower bound:
-  a valid concept the committee did not list counts as noise.
-
-**Demo**
-
-- The free server is slow, roughly 2 seconds per page, and sleeps when idle: the first upload
-  after a quiet period waits up to a minute longer.
-- Files are limited to 10 MB and 150 pages.
-
-**Development**
-
-- The extractor's golden test files are a Linux reference (as in CI), so two of those tests fail
-  on macOS.
-- The code was developed inside the private project and moved here without its history.
-  Docstrings that mention "the design", "the plan" or "owner decisions" refer to design
-  documents that are not included.
-
-## Development
-
-```bash
-pip install -e extractor -e pipeline -r requirements-dev.txt
-pytest
-ruff check . && ruff format --check .
-```
+The full pipeline, the demo and the development setup are in [docs/USAGE.md](docs/USAGE.md).
 
 ## Credits
 
-**Libraries in the product**
+This project relies on the open-source software below. Each component remains under its own
+license, and its authors do not endorse this project.
 
-- [pypdfium2](https://github.com/pypdfium2-team/pypdfium2) (Apache-2.0 or BSD-3-Clause, used
-  under BSD-3-Clause) and [PDFium](https://pdfium.googlesource.com/pdfium/) (BSD-3-Clause): the
-  PDF engine and the extractor's only runtime dependency. Installed by pip, not copied into this
-  repository; their authors do not endorse this project. PDFium bundles FreeType, libjpeg-turbo, libpng,
-  zlib, OpenJPEG, LittleCMS, libtiff, ICU and others. Portions of this software are copyright ©
-  The FreeType Project (www.freetype.org). All rights reserved. This software is based in part on
-  the work of the Independent JPEG Group.
-- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (Apache-2.0), optional, for
-  scanned pages.
-- The glyph atlas is built from fonts under the SIL Open Font License: STIX Two Math, Libertinus
-  Math, Noto Sans Math, Tinos, Arimo, David Libre, Frank Ruhl Libre, Miriam Libre, Alef, Noto Serif
-  Hebrew and Noto Sans Hebrew. Only shape descriptors are shipped, no font files.
+| Component | Used for | License |
+|---|---|---|
+| **Product** | | |
+| [pypdfium2](https://github.com/pypdfium2-team/pypdfium2) | Python interface to PDFium | Apache-2.0 or BSD-3-Clause, used under BSD-3-Clause |
+| [PDFium](https://pdfium.googlesource.com/pdfium/) | Reading PDF files | BSD-3-Clause |
+| [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) | Reading scanned pages, only when installed (off in the demo) | Apache-2.0 |
+| **Demo** | | |
+| [FastAPI](https://fastapi.tiangolo.com) | Demo server | MIT |
+| [Uvicorn](https://www.uvicorn.org) | Demo server | BSD-3-Clause |
+| [pdf.js](https://github.com/mozilla/pdf.js) | Showing PDF files | Apache-2.0 |
+| [docx-preview](https://github.com/VolodymyrBaydalka/docxjs) | Showing DOCX files | Apache-2.0 |
+| [JSZip](https://stuk.github.io/jszip/) | Opening DOCX files | MIT or GPL-3.0, used under MIT |
+| **Development and evaluation** | | |
+| [pytest](https://pytest.org) | Tests | MIT |
+| [Ruff](https://github.com/astral-sh/ruff) | Linting and formatting | MIT |
+| [fontTools](https://github.com/fonttools/fonttools) | Building the glyph atlas | MIT |
+| [HTTPX](https://www.python-httpx.org) | Calling model APIs | BSD-3-Clause |
+| [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python) | Calling model APIs | MIT |
 
-**Demo**
+**Fonts.** The glyph atlas is derived from STIX Two Math, Libertinus Math, Noto Sans Math, Tinos,
+Arimo, David Libre, Frank Ruhl Libre, Miriam Libre, Alef, Noto Serif Hebrew and Noto Sans Hebrew, all
+under the SIL Open Font License 1.1. Only shape descriptors are shipped, not the fonts themselves.
+The test files include Latin Modern Math (GUST Font License).
 
-- [FastAPI](https://fastapi.tiangolo.com) (MIT) and [Uvicorn](https://www.uvicorn.org)
-  (BSD-3-Clause): the demo server.
-- [pdf.js](https://github.com/mozilla/pdf.js) (Apache-2.0),
-  [docx-preview](https://github.com/VolodymyrBaydalka/docxjs) (Apache-2.0) and
-  [JSZip](https://stuk.github.io/jszip/) (MIT or GPL-3.0, used under MIT): show the original
-  document and count its pages in the browser. Unmodified copies with their licenses are in
-  [demo/web/vendor](demo/web/vendor/README.md).
-- Hosted on [GitHub Pages](https://pages.github.com) and [Render](https://render.com).
+**Standards.** Bidirectional reordering follows Unicode Standard Annex #9.
 
-**Development and evaluation**
+**Models and services.** I develop this project with the help of Claude (Anthropic). Claude Opus 5.5,
+GPT-6.1 Sol and Gemini 4 Carbon produced the evaluation labels. The demo is hosted on
+[GitHub Pages](https://pages.github.com) and [Render](https://render.com).
 
-- [pytest](https://pytest.org) (MIT), [Ruff](https://github.com/astral-sh/ruff) (MIT),
-  [fontTools](https://github.com/fonttools/fonttools) (MIT, builds the glyph atlas),
-  [HTTPX](https://www.python-httpx.org) (BSD-3-Clause) and the
-  [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python) (MIT).
-- The bidirectional reordering follows the Unicode Standard Annex #9 (UAX #9).
+**Required notices.** PDFium includes other libraries, among them FreeType, libjpeg-turbo, libpng,
+zlib, OpenJPEG, LittleCMS, libtiff and ICU. Portions of this software are copyright © The FreeType
+Project (www.freetype.org). All rights reserved. This software is based in part on the work of the
+Independent JPEG Group.
 
-Exact versions, licenses and obligations: [extractor/THIRD_PARTY_NOTICES.md](extractor/THIRD_PARTY_NOTICES.md).
+Versions, copyright notices and obligations are in
+[extractor/THIRD_PARTY_NOTICES.md](extractor/THIRD_PARTY_NOTICES.md). The licenses of the browser
+libraries are in [demo/web/vendor](demo/web/vendor/README.md).
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Copyright 2026 Yoav Malinovsky. Licensed under Apache-2.0. See [LICENSE](LICENSE) and
+[NOTICE](NOTICE).
