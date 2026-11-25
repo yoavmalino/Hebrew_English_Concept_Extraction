@@ -11,17 +11,6 @@ hierarchy). It is in active development, and you can follow my progress in the
 **<ins>This repository is the first part, and it runs end to end: from a PDF or DOCX to a list of up
 to 150 concepts, each with the passage that introduces it.</ins>** The two graphs are the next part.
 
-A few concepts from the demo's operating systems document, as the pipeline returned them:
-
-| Concept | The passage it comes with |
-|---|---|
-| מבוי סתום | מבוי סתום הוא מצב שבו קבוצה של תהליכים נמצאת בהמתנה מעגלית, כשכל תהליך בקבוצה ממתין למשאב שמוחזק על ידי תהליך אחר בקבוצה. |
-| תקלת דפים | תקלת דפים (page fault) מתרחשת כשתהליך ניגש לדף שאינו נמצא כרגע בזיכרון הפיזי. |
-| aging | הפתרון הנפוץ נקרא aging, שבו העדיפות של תהליך ממתין עולה בהדרגה עם הזמן. |
-| tlb | כדי למנוע זאת, המעבד מחזיק מטמון קטן של תרגומים שנקרא TLB (Translation Lookaside Buffer). |
-
-The document was generated for testing; it is not real course material.
-
 ## Motivation
 
 During my first and second years at the Technion, I struggled to connect the dots between
